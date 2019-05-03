@@ -10,6 +10,32 @@
 
 	<name>websocket-demo</name>
 	<description>Spring Boot WebSocket Chat Demo</description>
+	
+	<repositories>
+		<repository>
+			<id>dev-azure-com-jldeen-demo-maven</id>
+			<url>https://pkgs.dev.azure.com/jldeen-demo/_packaging/maven/maven/v1</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>dev-azure-com-jldeen-demo-maven</id>
+			<url>https://pkgs.dev.azure.com/jldeen-demo/_packaging/maven/maven/v1</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</distributionManagement>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
