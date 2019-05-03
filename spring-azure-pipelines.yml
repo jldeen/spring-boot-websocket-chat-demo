@@ -1,0 +1,198 @@
+# Deploy to Azure Kubernetes Service
+# Build and push image to Azure Container Registry; Deploy to Azure Kubernetes Service
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - Bikesharing.Campaign/*
+
+resources:
+- repo: self
+
+variables:
+
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'df9d8a54-286b-47af-8f89-e423226944da'
+  imageRepository: 'bikesharingcampaign'
+  containerRegistry: 'builddemo.azurecr.io'
+  dockerfilePath: '**/Dockerfile'
+  tag: '$(Build.BuildId)'
+  
+  # Kubernetes Namespace
+  k8sNamespace: 'default'
+  k8sNamespaceforpr: 'demopr'
+  imagePullSecret: 'builddemodfb0-auth'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:  
+  - job: Build
+    displayName: Build job
+    pool:
+      # name: work-machine
+      vmImage: $(vmImageName)
+    steps:
+
+    - bash: 'docker-compose -f docker-compose.ci.build.yml up'
+      displayName: 'Bash Script'
+
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          
+    - task: PublishPipelineArtifact@0
+      inputs:
+        artifactName: 'manifests'
+        targetPath: 'Bikesharing.Campaign/manifests'
+    
+    - task: PublishPipelineArtifact@0
+      inputs:
+        artifactName: 'charts'
+        targetPath: 'Bikesharing.Campaign/charts/bikesharingcampaign'
+
+- stage: DeployToDefault
+  displayName: Deploy to Default
+  dependsOn: Build
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/'))
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    pool:
+      name: work-machine
+      # vmImage: $(vmImageName)
+    environment: 'BikeSharing-Production.default-builddemo'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@1
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
+          
+          - task: DownloadPipelineArtifact@1
+            inputs:
+              artifactName: 'charts'
+              downloadPath: '$(System.ArtifactsDirectory)/charts'
+
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              action: createSecret
+              secretName: $(imagePullSecret)
+              namespace: $(k8sNamespace)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+          - task: KubernetesManifest@1
+            displayName: bake
+            name: bake
+            inputs:
+              action: bake
+              helmChart: '$(System.ArtifactsDirectory)/charts'
+
+          - task: KubernetesManifest@1
+            displayName: deploy
+            name: deploy
+            inputs:
+              action: deploy
+              namespace: $(k8sNamespace)
+              manifests: $(bake.manifestsBundle)
+              imagePullSecrets: $(imagePullSecret)
+                          
+          # - task: KubernetesManifest@0
+          #   displayName: Deploy to Kubernetes cluster
+          #   inputs:
+          #     action: deploy
+          #     namespace: $(k8sNamespace)
+          #     manifests: |
+          #       $(System.ArtifactsDirectory)/manifests/deployment.yml
+          #       $(System.ArtifactsDirectory)/manifests/service.yml
+          #     imagePullSecrets: |
+          #       $(imagePullSecret)
+          #     containers: |
+          #       $(containerRegistry)/$(imageRepository):$(tag)
+
+- stage: DeployForPR
+  displayName: Deploy to review app
+  dependsOn: Build
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/pull/'))
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    pool:
+      name: work-machine
+      # vmImage: $(vmImageName)
+    environment: 'BikeSharing-Development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@1
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
+
+          - task: DownloadPipelineArtifact@1
+            inputs:
+              artifactName: 'charts'
+              downloadPath: '$(System.ArtifactsDirectory)/charts'
+
+          - task: KubernetesManifest@0
+            displayName: 'Create PR namespace'
+            inputs:
+              kubernetesServiceConnection: 'BuildDemoForPR'
+              action: deploy
+              manifests: '$(System.ArtifactsDirectory)/manifests/pr-namespace.yml'
+
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              kubernetesServiceConnection: 'BuildDemoForPR'
+              action: createSecret
+              secretName: $(imagePullSecret)
+              namespace: $(k8sNamespaceforpr)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+          - task: KubernetesManifest@1
+            displayName: bake
+            name: bake
+            inputs:
+              action: bake
+              helmChart: '$(System.ArtifactsDirectory)/charts'
+
+          - task: KubernetesManifest@1
+            displayName: deploy
+            name: deploy
+            inputs:
+              action: deploy
+              namespace: $(k8sNamespaceforpr)
+              manifests: $(bake.manifestsBundle)
+              imagePullSecrets: $(imagePullSecret)
+
+          # - task: KubernetesManifest@0
+          #   displayName: Deploy to Kubernetes cluster
+          #   inputs:
+          #     kubernetesServiceConnection: 'BuildDemoForPR'
+          #     action: deploy
+          #     namespace: $(k8sNamespaceforpr)
+          #     manifests: |
+          #       $(System.ArtifactsDirectory)/manifests/deployment.yml
+          #       $(System.ArtifactsDirectory)/manifests/service.yml
+          #     imagePullSecrets: |
+          #       $(imagePullSecret)
+          #     containers: |
+          #       $(containerRegistry)/$(imageRepository):$(tag)
