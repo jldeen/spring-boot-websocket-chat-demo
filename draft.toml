@@ -1,0 +1,10 @@
+[environments]
+  [environments.development]
+    name = "spring-boot-websocket-chat-demo"
+    namespace = "default"
+    wait = true
+    watch = false
+    watch-delay = 2
+    auto-connect = false
+    dockerfile = "Dockerfile"
+    chart = ""
