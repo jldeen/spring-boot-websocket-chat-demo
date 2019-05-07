@@ -1,22 +1,68 @@
-# Maven
-# Build your Java project and run tests with Apache Maven.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
-
 trigger:
-- master
+  branches:
+    include:
+    - build19
 
 pool:
-  vmImage: 'Ubuntu-16.04'
-
+  name: jldeenlinux
 steps:
-- task: Maven@3
+- task: DownloadSecureFile@1
+  displayName: 'Download secure file'
   inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: false
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'package'
+    secureFile: 'settings.xml'
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(system.defaultworkingdirectory)'
+  inputs:
+    SourceFolder: '$(Agent.TempDirectory)'
+    Contents: '**/*.xml'
+    TargetFolder: '$(system.defaultworkingdirectory)'
+
+- task: Docker@2
+  displayName: 'Docker build/push'
+  inputs:
+    containerRegistry: jdk8sacr
+    repository: build19
+  continueOnError: true
+
+- task: HelmInstaller@0
+  displayName: 'Install Helm 2.13.1'
+  inputs:
+    helmVersion: 2.13.1
+
+- task: HelmDeploy@0
+  displayName: 'helm package'
+  inputs:
+    command: package
+    chartPath: 'charts/spring-boot-websocket-chat-demo'
+    chartVersion: '$(build.BuildId)'
+    destination: $(system.defaultworkingdirectory)
+
+- task: CopyFiles@2
+  displayName: 'copy helm chart'
+  inputs:
+    SourceFolder: '$(system.defaultworkingdirectory)'
+    Contents: '**/*.tgz'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/charts'
+
+- task: CopyFiles@2
+  displayName: 'copy jar'
+  inputs:
+    SourceFolder: '$(system.defaultworkingdirectory)'
+    Contents: '**/*.jar'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/maven'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish helm chart'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/charts'
+    ArtifactName: charts
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish jar'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/maven'
+    ArtifactName: maven
+
+- bash: 'rm $(system.defaultworkingdirectory)/settings.xml && echo "Successfully removed settings.xml from your default working directory."'
+  displayName: 'Cleanup secure files'
