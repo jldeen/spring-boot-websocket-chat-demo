@@ -1,199 +1,30 @@
-trigger:
-  branches:
-    include:
-    - azd-e2e
+pool:
+  name: Hosted Ubuntu 1604
+steps:
+- task: Docker@0
+  displayName: 'Build a container image'
+  inputs:
+    azureSubscription: 'Visual Studio Enterprise'
+    azureContainerRegistry: '{"loginServer":"jdacr10.azurecr.io", "id" : "/subscriptions/2f6472b1-f49b-4d88-87cf-30d3083413b5/resourceGroups/jdacr/providers/Microsoft.ContainerRegistry/registries/jdacr10"}'
 
-variables:
-  # Agent VM image name
-  vmImageName: 'jldeenlinux'
+- task: Docker@0
+  displayName: 'Push a container image'
+  inputs:
+    azureSubscription: 'Visual Studio Enterprise'
+    action: 'Push an image'
 
-stages:
-- stage: Build
-  displayName: Build stage
-  jobs:
-  - job: Build
-    displayName: kubernetes build
-    pool:
-      # name: work-machine
-      name: $(vmImageName)
-    steps:
+- task: HelmInstaller@0
+  displayName: 'Install Helm 2.9.1'
+  inputs:
+    kubectlVersion: 1.10.3
+    checkLatestKubectl: false
 
-    - task: DownloadSecureFile@1
-      inputs:
-        secureFile: 'settings.xml'
+- task: HelmDeploy@0
+  displayName: 'helm package'
+  inputs:
+    command: package
+    chartPath: 'charts/spring-boot-websocket-chat-demo'
+    save: false
 
-    - task: CopyFiles@2
-      displayName: 'Copy Files to: $(system.defaultworkingdirectory)'
-      inputs:
-        SourceFolder: '$(Agent.TempDirectory)'
-        Contents: '**/*.xml'
-        TargetFolder: '$(system.defaultworkingdirectory)'
-
-    - task: Docker@2
-      displayName: 'Docker build/push'
-      inputs:
-        command: buildAndPush
-        arguments: '--build-arg buildId=$(Build.BuildId)'
-        containerRegistry: jdk8sacr
-        repository: build19
-      continueOnError: true
-
-    - task: HelmInstaller@0
-      displayName: 'Install Helm 2.13.1'
-      inputs:
-        helmVersion: 2.13.1
-
-    - task: HelmDeploy@0
-      displayName: 'helm package'
-      inputs:
-        command: 'package'
-        chartName: 'spring-boot-websocket-chat-demo'
-        chartPath: 'charts/spring-boot-websocket-chat-demo'
-        version: '2019.$(build.BuildId)'
-        destination: $(system.defaultworkingdirectory)
-    
-    - task: CopyFiles@2
-      displayName: 'copy helm chart'
-      inputs:
-        SourceFolder: '$(system.defaultworkingdirectory)'
-        Contents: '**/*.tgz'
-        TargetFolder: 'buildArtifacts/charts'
-
-    - task: CopyFiles@2
-      displayName: 'copy jar'
-      inputs:
-        SourceFolder: '$(system.defaultworkingdirectory)'
-        Contents: '**/*.jar' 
-        TargetFolder: 'buildArtifacts/maven'
-
-    - task: PublishPipelineArtifact@0
-      displayName: 'Publish helm chart'
-      inputs:
-        artifactName: 'charts'
-        targetPath: 'buildArtifacts/charts'  
-
-    - task: PublishPipelineArtifact@0
-      displayName: 'Publish jar'
-      inputs:
-        artifactName: 'maven'
-        targetPath: 'buildArtifacts/maven'
-
-    - bash: 'rm $(system.defaultworkingdirectory)/settings.xml && echo "Successfully removed settings.xml from your default working directory."'
-      displayName: Cleanup
-
-- stage: DeployToDev
-  displayName: Deploy to Dev
-  dependsOn: Build
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/'))
-  jobs:
-  - deployment: Deploy
-    displayName: Deploy job
-    pool:
-      # name: work-machine
-      name: jldeenlinux
-    environment: 'build19-dev.e2build19-dev-jdk8s-us'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          
-          - task: DownloadPipelineArtifact@1
-            displayName: 'Download helm artifacts'
-            inputs:
-              artifactName: 'charts'
-              downloadPath: '$(System.ArtifactsDirectory)/charts'
-          
-          - task: DownloadPipelineArtifact@1
-            displayName: 'Download maven artifacts'
-            inputs:
-              artifactName: 'maven'
-              downloadPath: '$(System.ArtifactsDirectory)/maven'
-          
-          - bash: 'ls -la $(System.ArtifactsDirectory)/maven && ls -la $(System.ArtifactsDirectory)/charts && echo "$(System.ArtifactsDirectory)"'
-            displayName: 'Check pipeline artifacts'
-
-          - task: HelmInstaller@0
-            inputs:
-              helmVersion: '2.13.1'
-
-          - task: HelmDeploy@0
-            displayName: 'helm init'
-            inputs:
-              azureSubscription: 'ca-jessde-demo-test (dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
-              azureResourceGroup: 'jdk8s-us'
-              kubernetesCluster: 'jdk8s-us'
-              command: init
-              upgradeTiller: false
-              arguments: '--client-only'
-
-          - task: HelmDeploy@0
-            displayName: 'helm upgrade'
-            inputs:
-              azureSubscription: 'ca-jessde-demo-test (dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
-              azureResourceGroup: 'jdk8s-us'
-              kubernetesCluster: 'jdk8s-us'
-              command: upgrade
-              chartType: FilePath
-              chartPath: '$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-2019.$(build.BuildId).tgz'
-              releaseName: 'e2build19-dev'
-              namespace: 'e2build19-dev'
-              overrideValues: 'image.repository=jdk8s.azurecr.io/build19,image.tag=$(Build.BuildId)'
-
-- stage: DeployToProd
-  displayName: Deploy to Prod
-  dependsOn: DeployToDev
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/'))
-  jobs:
-  - deployment: Deploy
-    displayName: Deploy job
-    pool:
-      # name: work-machine
-      name: jldeenlinux
-    environment: 'build19-prod.e2build19-prod-jdk8s-us'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          
-          - task: DownloadPipelineArtifact@1
-            displayName: 'Download helm artifacts'
-            inputs:
-              artifactName: 'charts'
-              downloadPath: '$(System.ArtifactsDirectory)/charts'
-          
-          - task: DownloadPipelineArtifact@1
-            displayName: 'Download maven artifacts'
-            inputs:
-              artifactName: 'maven'
-              downloadPath: '$(System.ArtifactsDirectory)/maven'
-          
-          - bash: 'ls -la $(System.ArtifactsDirectory)/maven && ls -la $(System.ArtifactsDirectory)/charts && echo "$(System.ArtifactsDirectory)"'
-            displayName: 'Check pipeline artifacts'
-
-          - task: HelmInstaller@0
-            inputs:
-              helmVersion: '2.13.1'
-
-          - task: HelmDeploy@0
-            displayName: 'helm init'
-            inputs:
-              azureSubscription: 'ca-jessde-demo-test (dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
-              azureResourceGroup: 'jdk8s-us'
-              kubernetesCluster: 'jdk8s-us'
-              command: init
-              upgradeTiller: false
-              arguments: '--client-only'
-
-          - task: HelmDeploy@0
-            displayName: 'helm upgrade'
-            inputs:
-              azureSubscription: 'ca-jessde-demo-test (dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
-              azureResourceGroup: 'jdk8s-us'
-              kubernetesCluster: 'jdk8s-us'
-              command: upgrade
-              chartType: FilePath
-              chartPath: '$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-2019.$(build.BuildId).tgz'
-              releaseName: 'e2build19-prod'
-              namespace: 'e2build19-prod'
-              overrideValues: 'image.repository=jdk8s.azurecr.io/build19,image.tag=$(Build.BuildId),ingress.hostname=e2build19prod.k8s.az.jessicadeen.com'
-              
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifacts: drop'
