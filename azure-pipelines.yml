@@ -11,6 +11,7 @@ steps:
   displayName: 'Push a container image'
   inputs:
     azureSubscription: 'Visual Studio Enterprise'
+    azureContainerRegistry: '{"loginServer":"jdacr10.azurecr.io", "id" : "/subscriptions/2f6472b1-f49b-4d88-87cf-30d3083413b5/resourceGroups/jdacr/providers/Microsoft.ContainerRegistry/registries/jdacr10"}'
     action: 'Push an image'
 
 - task: HelmInstaller@0
