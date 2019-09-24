@@ -151,8 +151,8 @@ stages:
                     "footer_icon": "https://www.clipartmax.com/png/middle/69-698347_jfrog-artifactory-logo.png"
                 }
             ]
-        }' && echo "Slack XRay Message Posted"
-        if [[ "'$JF_SCAN_FAIL'" = *true* ]]; then exit 1; else exit 0; fi
+        }' > /dev/null 2>&1 && echo "Slack XRay Message Posted"
+        #if [[ "'$JF_SCAN_FAIL'" = *true* ]]; then exit 1; else exit 0; fi
       displayName: 'Slack Xray Trigger'
         
 - stage: DeployToDev
