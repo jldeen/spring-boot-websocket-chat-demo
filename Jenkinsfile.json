@@ -10,7 +10,7 @@
     "k8s_secret": {
       "name": "chattybot-secrets"
     },
-    "container_repo1": {
+    "container_repo": {
       "host": "jdk8s.azurecr.io",
       "master_acct": "jdk8s",
       "alt_acct": "jdk8s",

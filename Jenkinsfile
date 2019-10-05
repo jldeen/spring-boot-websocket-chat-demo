@@ -129,9 +129,9 @@ stage ('docker build') {
 
         // perform docker login to container registry as the docker-pipeline-plugin doesn't work with the next auth json format
         // container repo 1
-        withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.container_repo1.jenkins_creds_id,
+        withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.container_repo.jenkins_creds_id,
                         usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-          sh "echo ${env.PASSWORD} | docker login -u ${env.USERNAME} --password-stdin ${config.container_repo1.host}"
+          sh "echo ${env.PASSWORD} | docker login -u ${env.USERNAME} --password-stdin ${config.container_repo.host}"
         }
 
         // container repo2
@@ -143,13 +143,13 @@ stage ('docker build') {
 
         // dockerbuild
         pipeline.containerBuild(
-            dockerfile: config.container_repo1.dockerfile,
-            host      : config.container_repo1.host,
+            dockerfile: config.container_repo.dockerfile,
+            host      : config.container_repo.host,
             acct      : acct,
-            repo      : config.container_repo1.repo,
+            repo      : config.container_repo.repo,
             tags      : image_tags_list,
             buildTag  : image_tags_list.get(0),
-            auth_id   : config.container_repo1.jenkins_creds_id
+            auth_id   : config.container_repo.jenkins_creds_id
         )
       }
   }
