@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-    - yalla
+    - cdc
 
 variables:
   # Agent VM image name
