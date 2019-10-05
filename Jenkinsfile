@@ -128,20 +128,28 @@ stage ('docker build') {
       container('docker') {
 
         // perform docker login to container registry as the docker-pipeline-plugin doesn't work with the next auth json format
-        withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.container_repo.jenkins_creds_id,
+        // container repo 1
+        withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.container_repo1.jenkins_creds_id,
                         usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-          sh "echo ${env.PASSWORD} | docker login -u ${env.USERNAME} --password-stdin ${config.container_repo.host}"
+          sh "echo ${env.PASSWORD} | docker login -u ${env.USERNAME} --password-stdin ${config.container_repo1.host}"
+        }
+
+        // container repo2
+        // perform docker login to container registry as the docker-pipeline-plugin doesn't work with the next auth json format
+        withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: config.container_repo2.jenkins_creds_id,
+                        usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+          sh "echo ${env.PASSWORD} | docker login -u ${env.USERNAME} --password-stdin ${config.container_repo2.host}"
         }
 
         // dockerbuild
         pipeline.containerBuild(
-            dockerfile: config.container_repo.dockerfile,
-            host      : config.container_repo.host,
+            dockerfile: config.container_repo1.dockerfile,
+            host      : config.container_repo1.host,
             acct      : acct,
-            repo      : config.container_repo.repo,
+            repo      : config.container_repo1.repo,
             tags      : image_tags_list,
             buildTag  : image_tags_list.get(0),
-            auth_id   : config.container_repo.jenkins_creds_id
+            auth_id   : config.container_repo1.jenkins_creds_id
         )
       }
   }
