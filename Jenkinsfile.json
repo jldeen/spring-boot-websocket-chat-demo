@@ -11,16 +11,6 @@
       "name": "chattybot-secrets"
     },
     "container_repo": {
-      "host": "jdk8s.azurecr.io",
-      "master_acct": "jdk8s",
-      "alt_acct": "jdk8s",
-      "jenkins_creds_id": "jdk8s",
-      "repo": "chattybot",
-      "dockeremail": ".",
-      "dockerfile": "./",
-      "image_scanning": false
-    },
-    "container_repo2": {
       "host": "jfrogjd-docker.jfrog.io",
       "master_acct": "jfrogjd-docker.jfrog.io",
       "alt_acct": "jfrogjd-docker.jfrog.io",
