@@ -147,13 +147,13 @@ stage ('docker build') {
       }
   }
 
-  // stage ('aqua security scan') {
+  stage ('aqua security scan') {
     
-  //   container('docker'){
-  //     aqua locationType: 'local', localImage: 'jdk8s/chattybot:latest', notCompliesCmd: 'exit 1', onDisallowed: 'fail', customFlags: '--layer-vulnerabilities'
-  //   }
-  //   // echo "image id ${env.IMAGE_ID}"
-  // }
+    container('docker'){
+      aqua locationType: 'local', localImage: 'jdk8s/chattybot:latest', notCompliesCmd: 'exit 1', onDisallowed: 'fail', customFlags: '--layer-vulnerabilities'
+    }
+    // echo "image id ${env.IMAGE_ID}"
+  }
         
   stage ('publish container') {
 
