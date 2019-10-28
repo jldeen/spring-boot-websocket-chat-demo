@@ -236,6 +236,10 @@ stages:
             inputs:
               helmVersionToInstall: '2.14.0'
 
+          - task: KubectlInstaller@0
+            inputs:
+              kubectlVersion: 'latest'
+
           - task: HelmDeploy@0
             displayName: 'helm init'
             inputs:
