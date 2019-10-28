@@ -177,10 +177,10 @@ stages:
 
           - bash: 'ls -la $(System.ArtifactsDirectory)/charts && echo "$(System.ArtifactsDirectory)"'
             displayName: 'Check pipeline artifacts'
-
-          - task: HelmInstaller@0
+          
+          - task: HelmInstaller@1
             inputs:
-              helmVersion: '2.14.0'
+              helmVersionToInstall: '2.14.0'
 
           - task: HelmDeploy@0
             displayName: 'helm init'
@@ -228,9 +228,9 @@ stages:
           - bash: 'ls -la $(System.ArtifactsDirectory)/charts && echo "$(System.ArtifactsDirectory)"'
             displayName: 'Check pipeline artifacts'
 
-          - task: HelmInstaller@0
+          - task: HelmInstaller@1
             inputs:
-              helmVersion: '2.14.0'
+              helmVersionToInstall: '2.14.0'
 
           - task: HelmDeploy@0
             displayName: 'helm init'
