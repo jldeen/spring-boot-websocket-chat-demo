@@ -82,7 +82,8 @@ jobs:
         env:
           azureClientID: e13daae5-2cb2-4df1-ab7d-7dbe139e3e95
         run: |
-          vnetSubId=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name $subnetName --query id -o tsv)
+          vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name k8sSubnet --query id -o tsv)
+
           az aks create \
           --resource-group $resourceGroup \
           --subscription "$subName" \
