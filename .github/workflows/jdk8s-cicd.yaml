@@ -97,7 +97,7 @@ jobs:
           --dns-service-ip 10.2.0.10 \
           --service-cidr 10.2.0.0/24 \
           --docker-bridge-address 172.17.0.1/16 \
-          --vnet-subnet-id $vnetSubId \
+          --vnet-subnet-id $vnetID \
           --load-balancer-sku standard \
           --vm-set-type VirtualMachineScaleSets \
           --zones 1 2 3 \
