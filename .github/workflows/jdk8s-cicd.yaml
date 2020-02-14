@@ -12,7 +12,7 @@ env:
   vnetName: jdk8sVnet
   subnetName: jdk8sSubnet
   vnodeSubnetName: VNSubnet
-  clientId: 2c9cc5b3-eb35-44f1-88e2-0531b72f68db
+  clientId: 1ad14c1e-d79e-4102-bca2-09301b43613a
 
   # # container info
   # # containerRegistry: neilpeterson
