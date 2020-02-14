@@ -9,6 +9,8 @@ env:
   USER_ID: jessde
   subName: "ca-jessde-demo-test"
   aksName: jdk8s
+  vnetName: jdk8sVnet
+  subnetName: jdk8sSubnet
   clientId: 2c9cc5b3-eb35-44f1-88e2-0531b72f68db
 
   # # container info
@@ -47,24 +49,24 @@ jobs:
         run: |
           # run check for idempotent pipeline
           vnetCheck=$(az network vnet list -g $resourceGroup -o tsv --query [0].name)
-          if [[  $vnetCheck  ]]; then
+          if [[  $vnetCheck == *$vnetName*  ]]; then
             echo 'Virtual Network already exists'
           else
             echo 'Virtual network does not exist. Creating virtual network now.'
             # create vnet
-            az network vnet create --resource-group $resourceGroup --name k8sVNet --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name k8sSubnet --subnet-prefix 10.240.0.0/16
+            az network vnet create --resource-group $resourceGroup --name $vnetName --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name $subnetName --subnet-prefix 10.240.0.0/16
           fi
       # create virtual node subnet
       - name: "Create Virtual Node Subnet"
         run: |
           # run check for idempotent pipeline
-          vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name k8sVNet -o tsv --query '[1].name')
-          if [[  $vnetSubnetCheck  ]]; then
+          vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name $vnetName -o tsv --query '[1].name')
+          if [[  $vnetSubnetCheck == *$subnetName* ]]; then
             echo 'Virtual node subnet already exists'
           else
             echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
             # configure vnet subnet
-            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name k8sVNet --name VNSubnet  --address-prefix 10.241.0.0/16 
+            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $subnetName --address-prefix 10.241.0.0/16 
           fi
       # Deploy ACR
       - name: "Create Azure Container Registry"
@@ -97,19 +99,8 @@ jobs:
           echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
           AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
           az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin --overwrite-existing
-      # Application Insights (using preview extension)
-      - name: "Create Application Insights"
-        run: |
-          az extension add -n application-insights
-          instrumentationKey=$(az monitor app-insights component show --app tt-app-insights --resource-group $resourceGroup --query instrumentationKey -o tsv)
-      # # create postgres DB, Disable SSL, and set Firewall
-      # - name: "Create postgres DB, Disable SSL and set firewall"
-      #   run: |
-      #     POSTGRES=$(az postgres server list --resource-group $resourceGroup --query [0].name -o tsv)
-      #     az postgres db create -g $resourceGroup -s $POSTGRES -n stockdb
-      #     az postgres server update --resource-group $resourceGroup --name $POSTGRES --ssl-enforcement Disabled
-      #     az postgres server firewall-rule create --resource-group $resourceGroup --server-name $POSTGRES --name AllowAllAzureIps --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 
+      # Setup virutal node
       - name: "Install Virtual Node on K8s cluster"
         run: |
           vNodeEnabledCheck=$(az aks show --resource-group $resourceGroup --name $AKS_CLUSTER --query addonProfiles.aciConnectorLinux.enabled -o tsv)
@@ -123,17 +114,6 @@ jobs:
             --addons virtual-node \
             --subnet-name VNSubnet
           fi
-      # - name: "Create k8s twt namespace"
-      #   env:
-      #     nameSpace: twt
-      #   run: |
-      #     # twt namespace
-      #     cat <<EOF | kubectl apply -f -
-      #     apiVersion: v1
-      #     kind: Namespace
-      #     metadata:
-      #       name: $nameSpace
-      #     EOF
 
       - name: "Create keda namespace"
         env:
@@ -146,6 +126,7 @@ jobs:
           metadata:
             name: $nameSpace
           EOF
+
       - name: "Setup scaling backend components"
         run: |
           # add kedacore repo
@@ -226,6 +207,13 @@ jobs:
                 host: RabbitMqHost
                 queueLength  : '5'
           EOF
+
+      # Application Insights (using preview extension)
+      # - name: "Create Application Insights"
+      #   run: |
+      #     az extension add -n application-insights
+      #     instrumentationKey=$(az monitor app-insights component show --app tt-app-insights --resource-group $resourceGroup --query instrumentationKey -o tsv)
+
       - name: "Notes"
         run: |
           INGRESS=$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)
