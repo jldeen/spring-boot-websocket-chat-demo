@@ -11,6 +11,7 @@ env:
   aksName: jdk8s
   vnetName: jdk8sVnet
   subnetName: jdk8sSubnet
+  vnodeSubnetName: VNSubnet
   clientId: 2c9cc5b3-eb35-44f1-88e2-0531b72f68db
 
   # # container info
@@ -62,20 +63,19 @@ jobs:
           # run check for idempotent pipeline
           vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name $vnetName -o tsv --query '[1].name')
 
-          vnodeSubnet="${subnetName}Vnode"
-          echo "::set-env vnodeSubnet='${subnetName}Vnode'"
-
           if [[  $vnetSubnetCheck == *$vnodeSubnet* ]]; then
             echo 'Virtual node subnet already exists'
           else
             echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
             # configure vnet subnet
-            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnet --address-prefix 10.241.0.0/16 
+            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnetName --address-prefix 10.241.0.0/16 
           fi
+
       # Deploy ACR
       - name: "Create Azure Container Registry"
         run: |
           az acr create -n $aksName -g $resourceGroup --sku basic
+
       # Deploy AKS
       - name: "Deploy AKS"
         env:
