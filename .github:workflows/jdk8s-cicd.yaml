@@ -10,6 +10,7 @@ env:
   subName: "ca-jessde-demo-test"
   aksName: jdk8s
   clientId: 2c9cc5b3-eb35-44f1-88e2-0531b72f68db
+  clientSecret: 1ed200ec-b388-4519-86e4-63de914c9528
 
   # # container info
   # # containerRegistry: neilpeterson
@@ -90,7 +91,7 @@ jobs:
           --name $aksName \
           --node-count 3 \
           --service-principal $clientId \
-          --client-secret ${{ SECRETS.clientSecret }} \
+          --client-secret $clientSecret \
           --attach-acr $aksName
           --generate-ssh-keys \
           --network-plugin azure \
