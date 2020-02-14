@@ -63,7 +63,7 @@ jobs:
           # run check for idempotent pipeline
           vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name $vnetName -o tsv --query '[1].name')
 
-          if [[  $vnetSubnetCheck == *$vnodeSubnet* ]]; then
+          if [[  $vnetSubnetCheck == *$vnodeSubnetName* ]]; then
             echo 'Virtual node subnet already exists'
           else
             echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
@@ -89,7 +89,7 @@ jobs:
           --node-count 3 \
           --service-principal $clientId \
           --client-secret ${{ SECRETS.clientSecret }} \
-          --attach-acr $aksName
+          --attach-acr $aksName \
           --generate-ssh-keys \
           --network-plugin azure \
           --dns-service-ip 10.2.0.10 \
