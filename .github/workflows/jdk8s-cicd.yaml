@@ -55,8 +55,9 @@ jobs:
           else
             echo 'Virtual network does not exist. Creating virtual network now.'
             # create vnet
-            az network vnet create --resource-group $resourceGroup --name $vnetName --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name $subnetName --subnet-prefix 10.240.0.0/16
+            az network vnet create --resource-group $resourceGroup --name $vnetName --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name k8sSubnet --subnet-prefix 10.240.0.0/16
           fi
+
       # create virtual node subnet
       - name: "Create Virtual Node Subnet"
         run: |
@@ -68,7 +69,7 @@ jobs:
           else
             echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
             # configure vnet subnet
-            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnetName --address-prefix 10.241.0.0/16 
+            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name VNSubnet  --address-prefix 10.241.0.0/16 
           fi
 
       # Deploy ACR
