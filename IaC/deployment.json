@@ -19,26 +19,19 @@
       "type": "string",
       "defaultValue": "1.12.5"
     },
-    "pgversion": {
-      "type": "string",
-      "defaultValue": "10"
-    },
     "vnetSubnetID": {
       "type": "string"
     }
   },
   "variables": {
-    "acr_name": "[concat('ttacr',uniqueString(resourceGroup().id))]",
-    "storage_name": "[concat('ttstorage',uniqueString(resourceGroup().id))]",
-    "aks_name": "[concat('tailwindtradersaks',uniqueString(resourceGroup().id))]",
-    "function_name": "[concat('ttfunction',uniqueString(resourceGroup().id))]",
-    "sqlserver_name": "[concat('ttsqlserver',uniqueString(resourceGroup().id))]",
-    "pg_name": "[concat('ttpg',uniqueString(resourceGroup().id))]",
-    "coupons_cosmosdb_name": "[concat('ttcouponsdb',uniqueString(resourceGroup().id))]",
-    "shopping_cosmosdb_name": "[concat('ttshoppingdb',uniqueString(resourceGroup().id))]",
-    "workspaceName": "[concat('ttoms', uniqueString(resourceGroup().id))]",
+    "acr_name": "[concat('jdk8sacr',uniqueString(resourceGroup().id))]",
+    "storage_name": "[concat('jdk8storage',uniqueString(resourceGroup().id))]",
+    "aks_name": "[concat('jdk8saks',uniqueString(resourceGroup().id))]",
+    "function_name": "[concat('jdk8function',uniqueString(resourceGroup().id))]",
+    "sqlserver_name": "[concat('jdk8sqlserver',uniqueString(resourceGroup().id))]",
+    "workspaceName": "[concat('jdoms', uniqueString(resourceGroup().id))]",
     "omsWorkspaceId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]",
-    "components_app_insights_name": "tt-app-insights"
+    "components_app_insights_name": "jd-app-insights"
   },
   "resources": [
     {
@@ -168,29 +161,6 @@
       ]
     },
     {
-      "apiVersion": "2017-12-01",
-      "type": "Microsoft.DBforPostgreSQL/servers",
-      "location": "[resourceGroup().location]",
-      "name": "[variables('pg_name')]",
-      "properties": {
-        "version": "[parameters('pgversion')]",
-        "administratorLogin": "[parameters('sqlServerAdministratorLogin')]",
-        "administratorLoginPassword": "[parameters('sqlServerAdministratorLoginPassword')]",
-        "storageProfile": {
-          "storageMB": "5120",
-          "backupRetentionDays": "7",
-          "geoRedundantBackup": "Disabled"
-        }
-      },
-      "sku": {
-        "name": "GP_Gen5_2",
-        "tier": "GeneralPurpose",
-        "capacity": "2",
-        "size": "5120",
-        "family": "Gen5"
-      }
-    },
-    {
       "type": "Microsoft.Sql/servers",
       "name": "[variables('sqlserver_name')]",
       "apiVersion": "2015-05-01-preview",
@@ -296,54 +266,6 @@
       ]
     },
     {
-      "type": "Microsoft.DocumentDb/databaseAccounts",
-      "kind": "GlobalDocumentDB",
-      "name": "[variables('shopping_cosmosdb_name')]",
-      "apiVersion": "2015-04-08",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "defaultExperience": "Core (SQL)"
-      },
-      "properties": {
-        "databaseAccountOfferType": "Standard",
-        "locations": [
-          {
-            "id": "[concat(variables('shopping_cosmosdb_name'), '-', resourceGroup().location)]",
-            "failoverPriority": 0,
-            "locationName": "[resourceGroup().location]"
-          }
-        ],
-        "enableMultipleWriteLocations": true,
-        "isVirtualNetworkFilterEnabled": false,
-        "virtualNetworkRules": [],
-        "dependsOn": []
-      }
-    },
-    {
-      "apiVersion": "2015-04-08",
-      "kind": "MongoDB",
-      "type": "Microsoft.DocumentDb/databaseAccounts",
-      "name": "[variables('coupons_cosmosdb_name')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "databaseAccountOfferType": "Standard",
-        "locations": [
-          {
-            "id": "[concat(variables('coupons_cosmosdb_name'), '-', resourceGroup().location)]",
-            "failoverPriority": 0,
-            "locationName": "[resourceGroup().location]"
-          }
-        ],
-        "enableMultipleWriteLocations": true,
-        "isVirtualNetworkFilterEnabled": false,
-        "virtualNetworkRules": [],
-        "dependsOn": []
-      },
-      "tags": {
-        "defaultExperience": "Azure Cosmos DB for MongoDB API"
-      }
-    },
-    {
       "type": "Microsoft.Resources/deployments",
       "name": "SolutionDeployment",
       "apiVersion": "2017-05-10",
@@ -425,14 +347,6 @@
     "sqlserver": {
       "type": "string",
       "value": "[variables('sqlserver_name')]"
-    },
-    "couponsdb": {
-      "type": "string",
-      "value": "[variables('coupons_cosmosdb_name')]"
-    },
-    "shoppingdb": {
-      "type": "string",
-      "value": "[variables('shopping_cosmosdb_name')]"
     }
   }
 }
