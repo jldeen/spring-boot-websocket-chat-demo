@@ -101,6 +101,29 @@ jobs:
             --subnet-name $vnodeSubnetName
           fi
 
+      - name: "Create cert manager namespace"
+        env:
+          nameSpace: cert-manager
+        run: |
+          # cert manager namespace
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $nameSpace
+          EOF
+
+      - name: "Jetstack Cert Manager Config"
+        run: |
+          kubectl apply --validate=false \
+          -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.13/deploy/manifests/00-crds.yaml
+
+          helm repo add jetstack https://charts.jetstack.io
+
+          helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager
+
+          kubectl apply -f IaC/cluster-issuer.yaml
+
       - name: "Create keda namespace"
         env:
           nameSpace: keda
