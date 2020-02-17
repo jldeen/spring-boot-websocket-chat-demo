@@ -69,7 +69,7 @@ jobs:
           else
             echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
             # configure vnet subnet
-            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name VNSubnet  --address-prefix 10.241.0.0/16 
+            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnetName --address-prefix 10.241.0.0/16
           fi
 
       # Deploy ACR
@@ -82,7 +82,12 @@ jobs:
         env:
           azureClientID: e13daae5-2cb2-4df1-ab7d-7dbe139e3e95
         run: |
-          vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name k8sSubnet --query id -o tsv)
+          # vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name k8sSubnet --query id -o tsv)
+
+          subnetId=$(az network vnet subnet list \
+          --resource-group $resourceGroup \
+          --vnet-name $vnetName \
+          --query "[0].id" --output tsv)
 
           az aks create \
           --resource-group $resourceGroup \
@@ -97,7 +102,7 @@ jobs:
           --dns-service-ip 10.2.0.10 \
           --service-cidr 10.2.0.0/24 \
           --docker-bridge-address 172.17.0.1/16 \
-          --vnet-subnet-id $vnetID \
+          --vnet-subnet-id $subnetId \
           --load-balancer-sku standard \
           --vm-set-type VirtualMachineScaleSets \
           --zones 1 2 3 \
