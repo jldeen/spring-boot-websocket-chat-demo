@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   pullPolicy: IfNotPresent
-imagePullSecrets: jfrog
+imagePullSecrets: jdk8s
 service:
   name: java
   type: ClusterIP
@@ -19,9 +19,10 @@ resources:
     memory: 512Mi
 ingress:
   enabled: true
-  hostname: cf-chattybot.k8s.az.jessicadeen.com
+  hostname: chattybot.k8s.az.jessicadeen.com
   annotations:
-     kubernetes.io/ingress.class: nginx
+    #  kubernetes.io/ingress.class: nginx
+     kubernetes.io/ingress.class: addon-http-application-routing
      certmanager.k8s.io/cluster-issuer: letsencrypt-prod
      kubernetes.io/tls-acme: "true"
   tls: true
