@@ -172,7 +172,7 @@ jobs:
             name: $nameSpace
           type: kubernetes.io/dockercfg
           data:
-            .dockercfg: {{printf "{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}}" $repository .$username ${{ secrets.REGISTRY_PASSWORD }} $email | b64enc -}}
+            .dockercfg: {{printf "{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}}" $repository $username ${{ secrets.REGISTRY_PASSWORD }} $email | b64enc -}}
 
       - name: "Create keda namespace"
         env:
