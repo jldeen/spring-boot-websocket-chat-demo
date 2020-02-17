@@ -13,11 +13,8 @@ env:
   subnetName: jdk8sSubnet
   vnodeSubnetName: VNSubnet
 
-  # # container info
-  # # containerRegistry: neilpeterson
-  # # containerVersion: v2
-  # # tailwind deployment
-  # tailwindInfrastructure: deployment.json
+  # Deployment Paths
+  Infrastructure: IaC/deployment.json
   # tailwindCharts: TailwindTraders-Backend/Deploy/helm
   # tailwindChartValuesScript: helm-values/generate-config.ps1
   # tailwindChartValues: values.yaml
@@ -55,77 +52,55 @@ jobs:
           else
             echo 'Virtual network does not exist. Creating virtual network now.'
             # create vnet
-            az network vnet create --resource-group $resourceGroup --name $vnetName --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name k8sSubnet --subnet-prefix 10.240.0.0/16
+            az network vnet create --resource-group $resourceGroup --name $vnetName --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name $subnetName --subnet-prefix 10.240.0.0/16
           fi
 
       # create virtual node subnet
-      # - name: "Create Virtual Node Subnet"
-      #   run: |
-      #     # run check for idempotent pipeline
-      #     vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name $vnetName -o tsv --query '[1].name')
-
-      #     if [[  $vnetSubnetCheck == *$vnodeSubnetName* ]]; then
-      #       echo 'Virtual node subnet already exists'
-      #     else
-      #       echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
-      #       # configure vnet subnet
-      #       az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnetName --address-prefix 10.241.0.0/16
-      #     fi
-
-      # Deploy ACR
-      - name: "Create Azure Container Registry"
+      - name: "Create Virtual Node Subnet"
         run: |
-          az acr create -n $aksName -g $resourceGroup --sku standard --admin-enabled true
+          # run check for idempotent pipeline
+          vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name $vnetName -o tsv --query '[1].name')
 
-      # Deploy AKS
-      - name: "Deploy AKS"
+          if [[  $vnetSubnetCheck == *$vnodeSubnetName* ]]; then
+            echo 'Virtual node subnet already exists'
+          else
+            echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
+            # configure vnet subnet
+            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnetName --address-prefix 10.241.0.0/16
+          fi
+
+      #  Deploy backend infrastructure
+      - name: "Setup Backend Infra"
         env:
-          clientId: 47e460d8-c66e-4489-85dd-ee2b522aaea5
+          azureClientID: 47e460d8-c66e-4489-85dd-ee2b522aaea5
         run: |
-          # vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name k8sSubnet --query id -o tsv)
+          vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name $subnetName --query id -o tsv)
 
-          subnetId=$(az network vnet subnet list \
-          --resource-group $resourceGroup \
-          --vnet-name $vnetName \
-          --query "[0].id" --output tsv)
-
-          az aks create \
-          --resource-group $resourceGroup \
-          --subscription "$subName" \
-          --name $aksName \
-          --node-count 3 \
-          --service-principal $clientId \
-          --client-secret ${{ SECRETS.clientSecret }} \
-          --attach-acr $aksName \
-          --generate-ssh-keys \
-          --network-plugin azure \
-          --dns-service-ip 10.2.0.10 \
-          --service-cidr 10.2.0.0/24 \
-          --docker-bridge-address 172.17.0.1/16 \
-          --vnet-subnet-id $subnetId \
-          --load-balancer-sku standard \
-          --vm-set-type VirtualMachineScaleSets \
-          --zones 1 2 3 \
-          --network-policy calico
+          az group deployment create -g $resourceGroup --template-file $Infrastructure \
+            --parameters servicePrincipalId=$azureClientID servicePrincipalSecret=${{ secrets.CLIENT_SECRET }} \
+            sqlServerAdministratorLogin=$sqlServerUser sqlServerAdministratorLoginPassword=${{ secrets.sqlServePassword }} \
+            aksVersion=1.14.8 pgversion=10 vnetSubnetID=$vnetID
 
           echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
+
           AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
+
           az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin --overwrite-existing
 
-      # # Setup virutal node
-      # - name: "Install Virtual Node on K8s cluster"
-      #   run: |
-      #     vNodeEnabledCheck=$(az aks show --resource-group $resourceGroup --name $AKS_CLUSTER --query addonProfiles.aciConnectorLinux.enabled -o tsv)
-      #     if [[ $vNodeEnabledCheck == *true*  ]]; then
-      #       echo "AKS Virtual Node add-on already enabled."
-      #     else
-      #       # Deploy virtual node
-      #       az aks enable-addons \
-      #       --resource-group $resourceGroup  \
-      #       --name $AKS_CLUSTER \
-      #       --addons virtual-node \
-      #       --subnet-name $vnodeSubnet
-      #     fi
+      # Setup virutal node
+      - name: "Install Virtual Node on K8s cluster"
+        run: |
+          vNodeEnabledCheck=$(az aks show --resource-group $resourceGroup --name $AKS_CLUSTER --query addonProfiles.aciConnectorLinux.enabled -o tsv)
+          if [[ $vNodeEnabledCheck == *true*  ]]; then
+            echo "AKS Virtual Node add-on already enabled."
+          else
+            # Deploy virtual node
+            az aks enable-addons \
+            --resource-group $resourceGroup  \
+            --name $AKS_CLUSTER \
+            --addons virtual-node \
+            --subnet-name $vnodeSubnet
+          fi
 
       - name: "Create keda namespace"
         env:
@@ -219,12 +194,6 @@ jobs:
                 host: RabbitMqHost
                 queueLength  : '5'
           EOF
-
-      # Application Insights (using preview extension)
-      # - name: "Create Application Insights"
-      #   run: |
-      #     az extension add -n application-insights
-      #     instrumentationKey=$(az monitor app-insights component show --app tt-app-insights --resource-group $resourceGroup --query instrumentationKey -o tsv)
 
       - name: "Notes"
         run: |
