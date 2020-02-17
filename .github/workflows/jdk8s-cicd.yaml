@@ -98,7 +98,7 @@ jobs:
             --resource-group $resourceGroup  \
             --name $AKS_CLUSTER \
             --addons virtual-node \
-            --subnet-name $vnodeSubnet
+            --subnet-name $vnodeSubnetName
           fi
 
       - name: "Create keda namespace"
