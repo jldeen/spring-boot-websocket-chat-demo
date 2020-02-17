@@ -12,7 +12,6 @@ env:
   vnetName: jdk8sVnet
   subnetName: jdk8sSubnet
   vnodeSubnetName: VNSubnet
-  clientId: 1ad14c1e-d79e-4102-bca2-09301b43613a
 
   # # container info
   # # containerRegistry: neilpeterson
@@ -80,7 +79,7 @@ jobs:
       # Deploy AKS
       - name: "Deploy AKS"
         env:
-          azureClientID: e13daae5-2cb2-4df1-ab7d-7dbe139e3e95
+          clientId: 47e460d8-c66e-4489-85dd-ee2b522aaea5
         run: |
           # vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name k8sSubnet --query id -o tsv)
 
