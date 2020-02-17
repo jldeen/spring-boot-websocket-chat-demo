@@ -124,6 +124,56 @@ jobs:
 
           kubectl apply -f IaC/cluster-issuer.yaml
 
+      - name: "Create jfrog-dev namespace/secret"
+        env:
+          nameSpace: jfrog
+          repository: jfrogjd-docker.jfrog.io
+          username: admin
+          email: ServicePrincipal@AzureRM
+        run: |
+          # jfrog dev namespace
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $nameSpace
+          EOF
+
+          # jfrog secret
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: $nameSpace
+          type: kubernetes.io/dockercfg
+          data:
+            .dockercfg: {{printf "{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}}" $repository .$username ${{ registryPass }} $email | b64enc -}}
+
+      - name: "Create jfrog-prod namespace/secret"
+        env:
+          nameSpace: jfrog-prod
+          repository: jfrogjd-docker.jfrog.io
+          username: admin
+          email: ServicePrincipal@AzureRM
+        run: |
+          # jfrog prod namespace
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $nameSpace
+          EOF
+
+          # jfrog secret 
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: $nameSpace
+          type: kubernetes.io/dockercfg
+          data:
+            .dockercfg: {{printf "{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}}" $repository .$username ${{ secrets.REGISTRY_PASSWORD }} $email | b64enc -}}
+
       - name: "Create keda namespace"
         env:
           nameSpace: keda
