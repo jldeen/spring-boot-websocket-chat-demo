@@ -72,8 +72,9 @@ stages:
     - task: HelmDeploy@0
       displayName: 'helm package'
       inputs:
-        command: package
+        command: 'package'
         chartPath: 'charts/spring-boot-websocket-chat-demo'
+        save: false
 
     - bash: |
         # --- JFrog Publish Build Info to Artifactory
