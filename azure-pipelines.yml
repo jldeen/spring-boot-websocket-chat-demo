@@ -56,10 +56,15 @@ stages:
         containerRegistry: 'Jfrog Artifactory'
         repository: '$(Build.Repository.Name)'
 
-    - task: HelmInstaller@0
-      displayName: 'Install Helm 2.14.1'
+    - task: HelmInstaller@1
+      displayName: Install Helm 3.1.0 Client Binary
       inputs:
-        helmVersion: 2.14.1
+        helmVersionToInstall: '3.1.0'
+
+    - task: KubectlInstaller@0
+      displayName: Install Kubectl 1.17.1 Tool
+      inputs:
+        kubectlVersion: '1.17.1'
 
     - bash: helm lint charts/spring-boot-websocket-chat-demo
       displayName: helm lint
@@ -178,36 +183,27 @@ stages:
           - bash: 'ls -la $(System.ArtifactsDirectory)/charts && echo "$(System.ArtifactsDirectory)"'
             displayName: 'Check pipeline artifacts'
           
-          - task: HelmInstaller@1
+          - task: HelmInstaller@0
+            displayName: 'Install Helm 3.1.1'
             inputs:
-              helmVersionToInstall: '2.14.0'
-
-          - task: KubectlInstaller@0
-            inputs:
-              kubectlVersion: 'latest'
-
-          - task: HelmDeploy@0
-            displayName: 'helm init'
-            inputs:
-              azureSubscription: 'ca-jessde-demo-test(dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
-              azureResourceGroup: 'jdk8s-us'
-              kubernetesCluster: 'jdk8s-us'
-              command: init
-              upgradeTiller: false
-              arguments: '--client-only'
+              helmVersion: '3.1.0'
+              checkLatestHelmVersion: false
+              installKubectl: true
+              kubectlVersion: '1.17.1'
 
           - task: HelmDeploy@0
-            displayName: 'helm upgrade'
             inputs:
+              connectionType: 'Azure Resource Manager'
               azureSubscription: 'ca-jessde-demo-test(dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
-              azureResourceGroup: 'jdk8s-us'
-              kubernetesCluster: 'jdk8s-us'
-              command: upgrade
-              chartType: FilePath
-              chartPath: '$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz'
-              releaseName: 'swampup19-dev'
+              azureResourceGroup: 'jdk8s'
+              kubernetesCluster: 'jdk8saks3qpc7haiwjlfa'
               namespace: 'jfrog'
+              command: 'upgrade'
+              chartType: 'FilePath'
+              chartPath: '$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz'
+              releaseName: 'azdspring-dev'
               overrideValues: 'image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=dev-swampup19.k8s.az.jessicadeen.com,buildID=$(Build.BuildId)'
+
 - stage: PromoteToProd
   displayName: Promote to Prod
   dependsOn: DeployToDev
@@ -234,31 +230,22 @@ stages:
 
           - task: HelmInstaller@1
             inputs:
-              helmVersionToInstall: '2.14.0'
+              helmVersionToInstall: '3.1.0'
 
           - task: KubectlInstaller@0
             inputs:
-              kubectlVersion: 'latest'
-
-          - task: HelmDeploy@0
-            displayName: 'helm init'
-            inputs:
-              azureSubscription: 'ca-jessde-demo-test(dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
-              azureResourceGroup: 'jdk8s-us'
-              kubernetesCluster: 'jdk8s-us'
-              command: init
-              upgradeTiller: false
-              arguments: '--client-only'
+              kubectlVersion: '1.17.1'
 
           - task: HelmDeploy@0
             displayName: 'helm upgrade'
             inputs:
+              connectionType: 'Azure Resource Manager'
               azureSubscription: 'ca-jessde-demo-test(dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
-              azureResourceGroup: 'jdk8s-us'
-              kubernetesCluster: 'jdk8s-us'
-              command: upgrade
-              chartType: FilePath
-              chartPath: '$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz'
-              releaseName: 'swampup19-prod'
+              azureResourceGroup: 'jdk8s'
+              kubernetesCluster: 'jdk8saks3qpc7haiwjlfa'
               namespace: 'jfrog-prod'
+              command: 'upgrade'
+              chartType: 'FilePath'
+              chartPath: '$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz'
+              releaseName: 'azdspring-prod'
               overrideValues: 'image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),buildID=$(Build.BuildId)'
