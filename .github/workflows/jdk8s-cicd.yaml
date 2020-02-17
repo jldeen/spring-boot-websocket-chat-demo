@@ -75,7 +75,7 @@ jobs:
       # Deploy ACR
       - name: "Create Azure Container Registry"
         run: |
-          az acr create -n $aksName -g $resourceGroup --sku basic
+          az acr create -n $aksName -g $resourceGroup --sku standard --admin-enabled true
 
       # Deploy AKS
       - name: "Deploy AKS"
@@ -102,6 +102,7 @@ jobs:
           --vm-set-type VirtualMachineScaleSets \
           --zones 1 2 3 \
           --network-policy calico
+
           echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
           AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
           az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin --overwrite-existing
