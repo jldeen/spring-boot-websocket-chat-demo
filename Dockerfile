@@ -4,12 +4,8 @@ COPY . /usr/src/app
 RUN mvn --batch-mode -f /usr/src/app/pom.xml clean package
 
 # FROM openjdk:11-jre-slim
-<<<<<<< HEAD
-FROM jfrogjd-docker.jfrog.io/jldeen/alpine-jre-patched:1.1
-=======
 FROM jfrogjd-docker.jfrog.io/jldeen/alpine-jre-patched:latest
 RUN apk update && apk add bash
->>>>>>> master
 USER 1000:1000
 
 ENV PORT 8080
