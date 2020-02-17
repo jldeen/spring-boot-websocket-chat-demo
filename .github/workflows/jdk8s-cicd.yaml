@@ -40,7 +40,7 @@ jobs:
       # create resource group
       - name: "Create Resource Group"
         run: |
-          az group create --subscription "$subName" --name $resourceGroup --location $location --tags Tracking=$SESSION_CODE CreatedBy=$USER_ID
+          az group create --subscription "$subName" --name $resourceGroup --location $location --tags Tracking=$SESSION_TRACKING CreatedBy=$USER_ID
 
       # create VNet
       - name: "Create Virtual Network"
@@ -78,7 +78,6 @@ jobs:
 
           az group deployment create -g $resourceGroup --template-file $Infrastructure \
             --parameters servicePrincipalId=$azureClientID servicePrincipalSecret=${{ secrets.CLIENT_SECRET }} \
-            sqlServerAdministratorLogin=$sqlServerUser sqlServerAdministratorLoginPassword=${{ secrets.sqlServePassword }} \
             aksVersion=1.14.8 vnetSubnetID=$vnetID
 
           echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
