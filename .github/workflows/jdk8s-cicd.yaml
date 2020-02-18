@@ -347,8 +347,8 @@ jobs:
       # build/push
       - name: "build/push chattybot"
         run: |
-          docker build -f Dockerfile . -t $artDockerURL/chattybot:$GITHUB_SHA
-          docker push $artDockerURL/chattybot:$GITHUB_SHA
+          docker build . -t $artDockerURL/chattybot:${{ github.sha }}
+          docker push $artDockerURL/chattybot:${{ github.sha }}
 
       # helm lint
       - name: "helm lint"
