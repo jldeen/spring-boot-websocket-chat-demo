@@ -36,8 +36,8 @@ stages:
                   echo "Jfrog binary already exists. Logging into Artifactory now.."
               else
                   echo "Jfrog binary does not exist. Downloading now...."
-                  wget https:// dl.bintray.com/jfrog/jfrog-cli-go/1.24.2/jfrog-cli-linux-amd64/jfrog
-                  chmod +x jfrog
+                  curl -fL https://getcli.jfrog.io | sh
+                  sudo mv jfrog /usr/local/bin
               fi
 
               # Configure Jfrog CLI
@@ -48,6 +48,9 @@ stages:
               # --- jfrog Maven Build
               export M2_HOME=/usr/share/maven
               jfrog rt mvn "clean install -U -Dproject.version=$(Build.BuildId) -Dartifactory.publish.buildInfo=true" --build-name=$(System.TeamProject) --build-number=$(Build.BuildId)
+
+              jfrog rt build-collect-env $(System.TeamProject) $(Build.BuildId)
+              jfrog rt build-publish $(System.TeamProject) $(Build.BuildId)
             displayName: "jfrog maven build"
 
           - task: Docker@2
@@ -81,8 +84,8 @@ stages:
 
           - bash: |
               # --- JFrog Publish Build Info to Artifactory
-              #jfrog rt build-add-dependencies $(System.TeamProject) $(Build.BuildId) "target/*.jar"
               jfrog rt build-collect-env $(System.TeamProject) $(Build.BuildId)
+
               jfrog rt build-add-git $(System.TeamProject) $(Build.BuildId)
 
               # --- Jfrog Docker Push
@@ -90,6 +93,7 @@ stages:
 
               # --- Upload Helm Chart Artifact to Artifactory
               jfrog rt upload --server-id=$(server-id) --build-name=$(System.TeamProject) --build-number=$(Build.BuildId) "$(Build.ArtifactStagingDirectory)/*.tgz" helm-repo
+
               # -- build publish
               jfrog rt build-publish --build-url="https://dev.azure.com/$(System.CollectionId)/$(System.TeamProject)/_build/$(Build.BuildId)" --env-exclude="*key*;*pass*;" $(System.TeamProject) $(Build.BuildId) |& tee publish.txt
 
@@ -101,26 +105,7 @@ stages:
               ## Jfrog Build
               JF_BUILD=$(sed -n "s/^.*http/http/p" publish.txt)
 
-              curl -X POST https://slack.com/api/chat.postMessage -H 'Accept: */*'   -H 'Authorization: Bearer $(slackBotToken)'   -H 'Connection: keep-alive'   -H 'Content-Type: application/json; charset=utf-8'   -H 'accept-encoding: gzip, deflate'   -d '{"channel": "$(slackChannel)", "text": "Jfrog Artifactory Build $(Build.BuildId) Information", "attachments": [
-                      {
-                          "fallback": "JFrog Artifactory Azure DevOps Build $(Build.BuildID) Information",
-                          "color": "#36a64f",
-                          "author_link": "'$JF_BUILD'",
-                          "title": "JFrog Build Artifacts",
-                          "title_link": "'$JF_BUILD'",
-                          "text": "Build Artifacts for Azure DevOps $(Build.BuildId)",
-                          "fields": [
-                              {
-                                  "title": "Requested for",
-                                  "value": "Jessica Deen",
-                                  "short": false
-                              }
-                          ],
-                          "footer": "JFrog Artifactory Notifications",
-                          "footer_icon": "https://www.clipartmax.com/png/middle/69-698347_jfrog-artifactory-logo.png"
-                      }
-                  ]
-              }' && echo "Slack Build Message Posted"
+              curl -X POST --data-urlencode 'payload={"text":"Jfrog Artifactory Azure DevOps Build '$(Build.BuildId)' Information","attachments":[{"fallback":"JFrog Artifactory Azure DevOps Build '$(Build.BuildId)' Information","color":"#36a64f","author_link":"'$JF_BUILD'","title":"JFrog Build Artifacts","title_link":"'$JF_BUILD'","text":"Build Artifacts for Azure DevOps '$(Build.BuildId)'","fields":[{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog Artifactory Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' $(SLACK_WEBHOOK_URL) && echo "Slack Build Message Posted" && echo "Slack Build Message Posted"
             displayName: "Slack Build Trigger"
 
           - bash: |
@@ -128,7 +113,7 @@ stages:
 
               JF_XRAY_ALERTS=$(jq ".summary.total_alerts" results.json)
               JF_SCAN_FAIL=$(jq ".summary.fail_build" results.json)
-              JF_XRAY_RPT="https://jfrogjd-xray.jfrog.io/web/#/component/details/docker:~2F~2Fjldeen~2Fspring-boot-websocket-chat-demo/$(Build.BuildId)"
+              JF_XRAY_RPT="https://jfrogjd-xray.jfrog.io/web/#/component/details/build:~2F~2Fjldeen~2Fspring-boot-websocket-chat-demo/$(Build.BuildId)"
 
               if [[ $JF_XRAY_ALERTS -eq 0 ]]; then
                 slackStyle=good && echo "No Xray Scan alerts found"
@@ -136,31 +121,7 @@ stages:
                 slackStyle=danger && echo "Xray scan alerts found"
               fi
 
-              curl -X POST https://slack.com/api/chat.postMessage -H 'Accept: */*'   -H 'Authorization: Bearer $(slackBotToken)'   -H 'Connection: keep-alive'   -H 'Content-Type: application/json; charset=utf-8'   -H 'accept-encoding: gzip, deflate'   -d '{"channel": "$(slackChannel)", "text": "JFrog XRay Scan Report for Build $(Build.BuildID)", "attachments": [
-                      {
-                          "fallback": "JFrog XRay Scan Report for Azure DevOps Build $(Build.BuildID)",
-                          "color": "'$slackStyle'",
-                          "author_link": "'$JF_XRAY_RPT'",
-                          "title": "JFrog XRay Scan Report",
-                          "title_link": "'$JF_XRAY_RPT'",
-                          "text": "JFrog Xray Scan Report for Azure DevOps Build $(Build.BuildId)",
-                          "fields": [
-                              {
-                                  "title": "XRay Alerts",
-                                  "value": "'$JF_XRAY_ALERTS' alerts were generated",
-                                  "short": false
-                              },
-                              {
-                                  "title": "Requested for",
-                                  "value": "Jessica Deen",
-                                  "short": false
-                              }
-                          ],
-                          "footer": "JFrog XRay Scan Notifications",
-                          "footer_icon": "https://www.clipartmax.com/png/middle/69-698347_jfrog-artifactory-logo.png"
-                      }
-                  ]
-              }' > /dev/null 2>&1 && echo "Slack XRay Message Posted"
+              curl -X POST --data-urlencode 'payload={"text":"JFrog XRay Scan Report for Azure DevOps Build '$(Build.BuildId)'","attachments":[{"fallback":"JFrog XRay Scan Report for Azure DevOps Build '$(Build.BuildId)'","color":"'$slackStyle'","author_link":"'$JF_XRAY_RPT'","title":"JFrog XRay Scan Report for Azure DevOps","title_link":"'$JF_XRAY_RPT'","text":"JFrog Xray Scan Report for Azure DevOps Build '$(Build.BuildId)'","fields":[{"title":"XRay Alerts","value":"'$JF_XRAY_ALERTS' alerts were generated","short":false},{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog XRay Scan Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' $(SLACK_WEBHOOK_URL) > /dev/null 2>&1 && echo "Slack XRay Message Posted"
               #if [[ "'$JF_SCAN_FAIL'" = *true* ]]; then exit 1; else exit 0; fi
             displayName: "Slack Xray Trigger"
 
