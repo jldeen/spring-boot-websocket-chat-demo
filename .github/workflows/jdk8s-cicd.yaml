@@ -141,9 +141,9 @@ jobs:
           metadata:
             name: $secretName
             namespace: $nameSpace
-          type: kubernetes.io/dockercfg
+          type:  kubernetes.io/dockerconfigjson
           data:
-            .dockercfg: ${{ secrets.DOCKER_CFG }}
+            .dockercfgjson: ${{ secrets.DOCKER_CFG }}
           EOF
 
       - name: "Create jfrog-prod namespace/secret"
