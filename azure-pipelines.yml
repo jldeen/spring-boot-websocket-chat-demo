@@ -100,12 +100,12 @@ stages:
         
         curl -X POST https://slack.com/api/chat.postMessage -H 'Accept: */*'   -H 'Authorization: Bearer $(slackBotToken)'   -H 'Connection: keep-alive'   -H 'Content-Type: application/json; charset=utf-8'   -H 'accept-encoding: gzip, deflate'   -d '{"channel": "$(slackChannel)", "text": "Jfrog Artifactory Build $(Build.BuildId) Information", "attachments": [
                 {
-                    "fallback": "JFrog Artifactory Build $(Build.BuildID) Information",
+                    "fallback": "JFrog Artifactory Azure DevOps Build $(Build.BuildID) Information",
                     "color": "#36a64f",
                     "author_link": "'$JF_BUILD'",
                     "title": "JFrog Build Artifacts",
                     "title_link": "'$JF_BUILD'",
-                    "text": "Build Artifacts for $(Build.BuildId)",
+                    "text": "Build Artifacts for Azure DevOps $(Build.BuildId)",
                     "fields": [
                         {
                             "title": "Requested for",
@@ -135,12 +135,12 @@ stages:
         
         curl -X POST https://slack.com/api/chat.postMessage -H 'Accept: */*'   -H 'Authorization: Bearer $(slackBotToken)'   -H 'Connection: keep-alive'   -H 'Content-Type: application/json; charset=utf-8'   -H 'accept-encoding: gzip, deflate'   -d '{"channel": "$(slackChannel)", "text": "JFrog XRay Scan Report for Build $(Build.BuildID)", "attachments": [
                 {
-                    "fallback": "JFrog XRay Scan Report for Build $(Build.BuildID)",
+                    "fallback": "JFrog XRay Scan Report for Azure DevOps Build $(Build.BuildID)",
                     "color": "'$slackStyle'",
                     "author_link": "'$JF_XRAY_RPT'",
                     "title": "JFrog XRay Scan Report",
                     "title_link": "'$JF_XRAY_RPT'",
-                    "text": "JFrog Xray Scan Report for Build $(Build.BuildId)",
+                    "text": "JFrog Xray Scan Report for Azure DevOps Build $(Build.BuildId)",
                     "fields": [
                         {
                             "title": "XRay Alerts",
