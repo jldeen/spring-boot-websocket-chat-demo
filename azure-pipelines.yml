@@ -41,13 +41,13 @@ stages:
               fi
 
               # Configure Jfrog CLI
-              ./jfrog rt config $(server-id) --url=$(ART_URL) --user=$(ART_USER) --password=$(ART_PASS)
+              jfrog rt config $(server-id) --url=$(ART_URL) --user=$(ART_USER) --password=$(ART_PASS)
             displayName: "jfrog install, configure cli"
 
           - bash: |
               # --- jfrog Maven Build
               export M2_HOME=/usr/share/maven
-              ./jfrog rt mvn "clean install -Dproject.version=$(Build.BuildId) -Dartifactory.publish.buildInfo=true" --build-name=$(System.TeamProject) --build-number=$(Build.BuildId)
+              jfrog rt mvn "clean install -U -Dproject.version=$(Build.BuildId) -Dartifactory.publish.buildInfo=true" --build-name=$(System.TeamProject) --build-number=$(Build.BuildId)
             displayName: "jfrog maven build"
 
           - task: Docker@2
@@ -81,20 +81,20 @@ stages:
 
           - bash: |
               # --- JFrog Publish Build Info to Artifactory
-              #./jfrog rt build-add-dependencies $(System.TeamProject) $(Build.BuildId) "target/*.jar"
-              ./jfrog rt build-collect-env $(System.TeamProject) $(Build.BuildId)
-              ./jfrog rt build-add-git $(System.TeamProject) $(Build.BuildId)
+              #jfrog rt build-add-dependencies $(System.TeamProject) $(Build.BuildId) "target/*.jar"
+              jfrog rt build-collect-env $(System.TeamProject) $(Build.BuildId)
+              jfrog rt build-add-git $(System.TeamProject) $(Build.BuildId)
 
               # --- Jfrog Docker Push
-              ./jfrog rt docker-push --server-id=$(server-id) --build-name=$(System.TeamProject) --build-number=$(Build.BuildId) "$(artDocker_URL)/$(Build.Repository.Name):$(Build.BuildId)" docker-dev
+              jfrog rt docker-push --server-id=$(server-id) --build-name=$(System.TeamProject) --build-number=$(Build.BuildId) "$(artDocker_URL)/$(Build.Repository.Name):$(Build.BuildId)" docker-dev
 
               # --- Upload Helm Chart Artifact to Artifactory
-              ./jfrog rt upload --server-id=$(server-id) --build-name=$(System.TeamProject) --build-number=$(Build.BuildId) "$(Build.ArtifactStagingDirectory)/*.tgz" helm-repo
+              jfrog rt upload --server-id=$(server-id) --build-name=$(System.TeamProject) --build-number=$(Build.BuildId) "$(Build.ArtifactStagingDirectory)/*.tgz" helm-repo
               # -- build publish
-              ./jfrog rt build-publish --build-url="https://dev.azure.com/$(System.CollectionId)/$(System.TeamProject)/_build/$(Build.BuildId)" --env-exclude="*key*;*pass*;" $(System.TeamProject) $(Build.BuildId) |& tee publish.txt
+              jfrog rt build-publish --build-url="https://dev.azure.com/$(System.CollectionId)/$(System.TeamProject)/_build/$(Build.BuildId)" --env-exclude="*key*;*pass*;" $(System.TeamProject) $(Build.BuildId) |& tee publish.txt
 
               # --- Xray Scan
-              ./jfrog rt build-scan --server-id=$(server-id) $(System.TeamProject) $(Build.BuildId) | tee results.json
+              jfrog rt build-scan --server-id=$(server-id) $(System.TeamProject) $(Build.BuildId) | tee results.json
             displayName: "jfrog publish build info to artifactory"
 
           - bash: |
@@ -181,7 +181,7 @@ stages:
               steps:
                 - bash: |
                     ## Jfrog Download Helm Chart
-                    ./jfrog rt download --server-id=$(server-id) --build-name=$(System.TeamProject) --build-number=$(Build.BuildId) "helm-repo/*.tgz" $(System.ArtifactsDirectory)/charts/
+                    jfrog rt download --server-id=$(server-id) --build-name=$(System.TeamProject) --build-number=$(Build.BuildId) "helm-repo/*.tgz" $(System.ArtifactsDirectory)/charts/
                   displayName: Download Helm Chart Artifact
 
                 - bash: 'ls -la $(System.ArtifactsDirectory)/charts && echo "$(System.ArtifactsDirectory)"'
@@ -225,7 +225,7 @@ stages:
               steps:
                 - bash: |
                     ## Jfrog Download Helm Chart
-                    ./jfrog rt download --server-id=$(server-id) --build-name=$(System.TeamProject) --build-number=$(Build.BuildId) "helm-repo/*.tgz" $(System.ArtifactsDirectory)/charts/
+                    jfrog rt download --server-id=$(server-id) --build-name=$(System.TeamProject) --build-number=$(Build.BuildId) "helm-repo/*.tgz" $(System.ArtifactsDirectory)/charts/
                   displayName: Download Helm Chart Artifact
 
                 - bash: 'ls -la $(System.ArtifactsDirectory)/charts && echo "$(System.ArtifactsDirectory)"'
