@@ -409,6 +409,7 @@ jobs:
     needs: buildImages
     env:
       nameSpace: jfrog
+      artDockerURL: jfrogjd-docker.jfrog.io
     steps:
       - name: "configure deployment environment"
         run: |
