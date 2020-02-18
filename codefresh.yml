@@ -68,7 +68,7 @@ steps:
           command: sh -c "exit 0"
     composition_candidates:
       dockerinfo_upload:
-        image: jldeen/docker-jfrog-cli-java:1.0.1
+        image: jldeen/docker-jfrog-cli-java:1.0.3
         working_dir: ${{CF_VOLUME_PATH}}/${{CF_REPO_NAME}}
         environment:
           - JFROG_CLI_OFFER_CONFIG=false
