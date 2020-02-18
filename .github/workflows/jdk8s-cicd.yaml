@@ -309,7 +309,7 @@ jobs:
     needs: deployInfra
     env:
       artDockerURL: jfrogjd-docker.jfrog.io
-      ART_URL: "https://jfrogjd.jfrog.io/jfrogjd/"
+      ART_URL: https://jfrogjd.jfrog.io/jfrogjd/
       ART_USER: admin
       SERVER_ID: jfrog-jd
       SLACK_CHANNEL: chattybot
@@ -329,12 +329,11 @@ jobs:
               echo "Jfrog binary already exists. Logging into Artifactory now.."
           else
               echo "Jfrog binary does not exist. Downloading now...."
-              wget https:// dl.bintray.com/jfrog/jfrog-cli-go/1.24.2/jfrog-cli-linux-amd64/jfrog
-              chmod +x jfrog
+              curl -fL https://getcli.jfrog.io | sh
           fi
 
           # Configure Jfrog CLI
-          ./jfrog rt config $SERVER_ID --url=$ART_URL --user=$ART_USER --password=${{ secrets.ART_PASS }}
+          ./jfrog rt config $SERVER_ID --url=$ART_URL --user=$ART_USER --password=${{ secrets.ART_PASS }} --interactive=false
 
       - name: "jfrog maven build"
         run: |
