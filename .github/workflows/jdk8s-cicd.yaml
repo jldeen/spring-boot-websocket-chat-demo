@@ -314,14 +314,6 @@ jobs:
       SERVER_ID: jfrog-jd
       SLACK_CHANNEL: chattybot
     steps:
-      # docker login
-      - name: "docker login"
-        uses: azure/docker-login@v1
-        with:
-          login-server: $artDockerURL
-          username: $ART_USER
-          password: ${{ secrets.ART_PASS }}
-
       - name: "jfrog install, configure cli"
         run: |
           # Get Jfrog CLI
@@ -343,6 +335,14 @@ jobs:
 
           ./jfrog rt build-collect-env $GITHUB_REPOSITORY $GITHUB_RUN_ID
           ./jfrog rt build-publish $GITHUB_REPOSITORY $GITHUB_RUN_ID
+
+      # docker login
+      - name: "docker login"
+        uses: azure/docker-login@v1
+        with:
+          login-server: $artDockerURL
+          username: $ART_USER
+          password: ${{ secrets.ART_PASS }}
 
       # build/push
       - name: "build/push chattybot"
@@ -403,7 +403,7 @@ jobs:
               ]
           }' && echo "Slack Build Message Posted"
 
-      - name: "Slack Xray Trigger"
+      - name: "slack xray trigger"
         run: |
           ## Jfrog Xray Scan
 
