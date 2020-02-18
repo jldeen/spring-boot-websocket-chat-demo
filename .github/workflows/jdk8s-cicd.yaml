@@ -101,6 +101,28 @@ jobs:
             --subnet-name $vnodeSubnetName
           fi
 
+      # Ngnix for production
+      - name: "Configure Ngnix for production"
+        env:
+          nameSpace: ingress
+        run: |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $nameSpace
+          EOF
+
+          helm repo add stable http://storage.googleapis.com/kubernetes-charts
+
+          helm repo update
+
+          helm upgrade --install nginx-ingress stable/nginx-ingress \
+          --namespace $nameSpace \
+          --set controller.replicaCount=2 \
+          --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
+          --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
+
       - name: "Create cert manager namespace"
         env:
           nameSpace: cert-manager
@@ -118,9 +140,11 @@ jobs:
           kubectl apply --validate=false \
           -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.13/deploy/manifests/00-crds.yaml
 
+          kubectl label namespace ingress certmanager.k8s.io/disable-validation=true
+
           helm repo add jetstack https://charts.jetstack.io
 
-          helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager
+          helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
 
           kubectl apply -f IaC/cluster-issuer.yaml
 
@@ -141,7 +165,7 @@ jobs:
           metadata:
             name: $secretName
             namespace: $nameSpace
-          type:  kubernetes.io/dockerconfigjson
+            type:  kubernetes.io/dockerconfigjson
           data:
             .dockerconfigjson: ${{ secrets.DOCKER_CFG }}
           EOF

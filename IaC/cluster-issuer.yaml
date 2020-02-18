@@ -11,8 +11,8 @@ spec:
       key: ""
       name: letsencrypt-prod
     server: https://acme-v02.api.letsencrypt.org/directory
-    # # Enable the HTTP-01 challenge provider
-    # solvers:
-    #   - http01:
-    #       ingress:
-    #         class: nginx
+    # Enable the HTTP-01 challenge provider
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
