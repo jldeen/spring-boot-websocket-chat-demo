@@ -126,6 +126,7 @@ jobs:
 
       - name: "Create jfrog-dev namespace/secret"
         env:
+          secretName: jdk8s
           nameSpace: jfrog
           repository: jfrogjd-docker.jfrog.io
           username: admin
@@ -137,14 +138,12 @@ jobs:
           kind: Namespace
           metadata:
             name: $nameSpace
-          EOF
-
-          # jfrog secret
-          cat <<EOF | kubectl apply -f -
+          ---
           apiVersion: v1
           kind: Secret
           metadata:
-            name: $nameSpace
+            name: $secretName
+            namespace: $nameSpace
           type: kubernetes.io/dockercfg
           data:
             .dockercfg: {{printf "{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}}" $repository $username ${{ secrets.REGISTRY_PASSWORD }} $email | b64enc -}}
@@ -152,6 +151,7 @@ jobs:
 
       - name: "Create jfrog-prod namespace/secret"
         env:
+          secretName: jdk8s
           nameSpace: jfrog-prod
           repository: jfrogjd-docker.jfrog.io
           username: admin
@@ -163,14 +163,12 @@ jobs:
           kind: Namespace
           metadata:
             name: $nameSpace
-          EOF
-
-          # jfrog secret 
-          cat <<EOF | kubectl apply -f -
+          ---
           apiVersion: v1
           kind: Secret
           metadata:
-            name: $nameSpace
+            name: $secretName
+            namespace: $nameSpace
           type: kubernetes.io/dockercfg
           data:
             .dockercfg: {{printf "{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}}" $repository $username ${{ secrets.REGISTRY_PASSWORD }} $email | b64enc -}}
