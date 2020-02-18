@@ -349,7 +349,7 @@ jobs:
         run: |
           echo ${{ secrets.ART_PASS }} | docker login $artDockerURL -u $ART_USER --password-stdin && echo "jfrog docker login successful"
 
-          docker build . -t $artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}
+          docker build -f Dockerfile . -t $artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}
 
           docker push $artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}
 
