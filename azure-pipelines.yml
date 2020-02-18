@@ -55,6 +55,9 @@ stages:
       inputs:
         containerRegistry: 'Jfrog Artifactory'
         repository: '$(Build.Repository.Name)'
+        command: 'buildAndPush'
+        Dockerfile: 'Dockerfile'
+        buildContext: '.'
 
     - task: HelmInstaller@1
       displayName: Install Helm 3.1.0 Client Binary
