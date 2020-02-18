@@ -331,7 +331,7 @@ jobs:
         run: |
           # --- jfrog Maven Build
           export M2_HOME=/usr/share/maven
-          ./jfrog rt mvn "clean install -Dproject.version=$GITHUB_SHA -Dartifactory.publish.buildInfo=true" maven.yaml --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID
+          ./jfrog rt mvn "clean install -f ./pom.xml -Dartifactory.publish.artifacts=true -Dproject.version=$GITHUB_SHA -Dartifactory.publish.buildInfo=true" maven.yaml --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID
 
           ./jfrog rt build-collect-env $GITHUB_REPOSITORY $GITHUB_RUN_ID
           ./jfrog rt build-publish $GITHUB_REPOSITORY $GITHUB_RUN_ID
