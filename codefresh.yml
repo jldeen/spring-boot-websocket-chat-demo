@@ -19,7 +19,7 @@ steps:
     stage: "build"
     commands:
       - export M2_HOME=/usr/share/maven
-      - jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}}
+      - jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}} --interactive=false
       - jfrog rt mvn "clean install -U -Dproject.version=${{CF_BUILD_ID}} -Dartifactory.publish.buildInfo=true" --build-name=${{CF_REPO_NAME}} --build-number=${{CF_BUILD_ID}}
       - jfrog rt build-collect-env ${{CF_REPO_NAME}} ${{CF_BUILD_ID}}
       - jfrog rt build-publish ${{CF_REPO_NAME}} ${{CF_BUILD_ID}}
@@ -77,7 +77,7 @@ steps:
             docker login --username ${{JFROG_USER}} --password "${{JFROG_PASS}}" ${{REPOSITORY}}
 
           # --- Login to Artifactory
-              jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}}
+              jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}} --interactive=false
 
           # --- JFrog Publish Build Info to Artifactory
               jfrog rt build-collect-env ${{CF_REPO_NAME}} ${{CF_BUILD_ID}}
@@ -105,7 +105,7 @@ steps:
     stage: "test"
     shell: bash
     commands:
-      - jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}}
+      - jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}} --interactive=false
       - jfrog rt build-scan --server-id=${{JFROG_SERVER_ID}} ${{CF_REPO_NAME}} ${{CF_BUILD_ID}} | tee results.json
       - export JF_BUILD=$(sed -n "s/^.*http/http/p" publish.txt)
       - export JF_XRAY_ALERTS=$(jq ".summary.total_alerts" results.json)

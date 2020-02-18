@@ -41,7 +41,7 @@ stages:
               fi
 
               # Configure Jfrog CLI
-              jfrog rt config $(server-id) --url=$(ART_URL) --user=$(ART_USER) --password=$(ART_PASS)
+              jfrog rt config $(server-id) --url=$(ART_URL) --user=$(ART_USER) --password=$(ART_PASS) --interactive=false
             displayName: "jfrog install, configure cli"
 
           - bash: |
