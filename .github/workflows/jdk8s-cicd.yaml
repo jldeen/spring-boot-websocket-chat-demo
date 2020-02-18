@@ -15,13 +15,6 @@ env:
 
   # Deployment Paths
   Infrastructure: IaC/deployment.json
-  # tailwindCharts: TailwindTraders-Backend/Deploy/helm
-  # tailwindChartValuesScript: helm-values/generate-config.ps1
-  # tailwindChartValues: values.yaml
-  # tailwindWebImages: TailwindTraders-Backend/Deploy/tailwindtraders-images
-  # tailwindServiceAccount: TailwindTraders-Backend/Deploy/helm/ttsa.yaml
-  # # Github SECRETS
-  # sqlServerUser: sqladmin
 
 jobs:
   deployInfra:
@@ -321,11 +314,16 @@ jobs:
       SERVER_ID: jfrog-jd
       SLACK_CHANNEL: chattybot
     steps:
+      # docker login
+      - name: "docker login"
+        uses: azure/docker-login@v1
+        with:
+          login-server: $artDockerURL
+          username: $ART_USER
+          password: ${{ secrets.ART_PASS }}
+
       - name: "jfrog install, configure cli"
         run: |
-          #Login to Docker with jfrog artifactory creds
-          echo ${{ secrets.ART_PASS }} | docker login $artDocker_URL -u $ART_USER --password-stdin && echo "jfrog docker login successful"
-
           # Get Jfrog CLI
           if [ -e jfrog ]; then
               echo "Jfrog binary already exists. Logging into Artifactory now.."
@@ -337,19 +335,15 @@ jobs:
 
           # Configure Jfrog CLI
           ./jfrog rt config $SERVER_ID --url=$ART_URL --user=$ART_USER --password=${{ secrets.ART_PASS }}
+
       - name: "jfrog maven build"
         run: |
           # --- jfrog Maven Build
           export M2_HOME=/usr/share/maven
           ./jfrog rt mvn "clean install -Dproject.version=$GITHUB_SHA -Dartifactory.publish.buildInfo=true" maven.yaml --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID
 
-      # docker login
-      - name: "docker login"
-        uses: azure/docker-login@v1
-        with:
-          login-server: $artDockerURL
-          username: $ART_USER
-          password: ${{ secrets.ART_PASS }}
+          ./jfrog rt build-collect-env $GITHUB_REPOSITORY $GITHUB_RUN_ID
+          ./jfrog rt build-publish $GITHUB_REPOSITORY $GITHUB_RUN_ID
 
       # build/push
       - name: "build/push chattybot"
@@ -424,7 +418,7 @@ jobs:
             slackStyle=danger && echo "Xray scan alerts found"
           fi
 
-          curl -X POST https://slack.com/api/chat.postMessage -H 'Accept: */*'   -H 'Authorization: Bearer $(slackBotToken)'   -H 'Connection: keep-alive'   -H 'Content-Type: application/json; charset=utf-8'   -H 'accept-encoding: gzip, deflate'   -d '{"channel": "$SLACK_CHANNEL", "text": "JFrog XRay Scan Report for GitHub Run $GITHUB_RUN_ID", "attachments": [
+          curl -X POST https://slack.com/api/chat.postMessage -H 'Accept: */*'   -H 'Authorization: Bearer ${{ secrets.slackBotToken }}'   -H 'Connection: keep-alive'   -H 'Content-Type: application/json; charset=utf-8'   -H 'accept-encoding: gzip, deflate'   -d '{"channel": "$SLACK_CHANNEL", "text": "JFrog XRay Scan Report for GitHub Run $GITHUB_RUN_ID", "attachments": [
                   {
                       "fallback": "JFrog XRay Scan Report for GitHub Run $GITHUB_RUN_ID",
                       "color": "'$slackStyle'",
@@ -450,7 +444,7 @@ jobs:
               ]
           }' > /dev/null 2>&1 && echo "Slack XRay Message Posted"
           #if [[ "'$JF_SCAN_FAIL'" = *true* ]]; then exit 1; else exit 0; fi
-  # deployMicroservices:
+  # deployMicroservicesDEV:
   #   runs-on: self-hosted
   #   needs: buildImages
   #   env:
@@ -467,150 +461,15 @@ jobs:
   #         # echo "::set-env name=acrName::$(az acr list -g $resourceGroup -o tsv --query "[0].name")"
   #         echo "::set-env name=CONTAINER_REGISTRY::$(az acr list -g $resourceGroup -o tsv --query [0].loginServer)"
   #         echo "::set-env name=pictures::$(az storage account list -g $resourceGroup --query [0].primaryEndpoints.blob -o tsv)"
-  #         # git -C TailwindTraders-Backend checkout ed86d5f
   #     - name: "helm install login api"
   #       run: |
-  #         # twt login
+  #         # spring deploy
   #         helm upgrade --install my-tt-login -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/login.api --set image.tag=$GITHUB_SHA --set inf.storage.profileimages=${pictures}profiles-list $tailwindCharts/login-api
-  #     - name: "helm install product api"
-  #       run: |
-  #         # twt product
-  #         helm upgrade --install my-tt-product -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/product.api --set image.tag=$GITHUB_SHA --set inf.storage.productimages=${pictures}product-list --set inf.storage.productdetailimages=${pictures}product-detail --set az.productvisitsurl=http://your-product-visits-af-here $tailwindCharts/products-api
-  #     - name: "helm install coupon api"
-  #       run: |
-  #         # twt coupon
-  #         helm upgrade --install my-tt-coupon -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/coupon.api --set image.tag=$GITHUB_SHA --set inf.storage.couponimage=${pictures}coupon-list $tailwindCharts/coupons-api
-  #     - name: "helm install profile api"
-  #       run: |
-  #         # twt profile
-  #         helm upgrade --install my-tt-profile -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/profile.api --set image.tag=$GITHUB_SHA --set inf.storage.profileimages=${pictures}profiles-list $tailwindCharts/profiles-api
-  #     - name: "helm install popular product api"
-  #       run: |
-  #         # twt popular product
-  #         helm upgrade --install my-tt-popular-product -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/popular-product.api --set image.tag=$GITHUB_SHA --set initImage.repository=$CONTAINER_REGISTRY/popular-product-seed.api --set initImage.tag=$GITHUB_SHA --set inf.storage.productimages=${pictures}product-list $tailwindCharts/popular-products-api
-  #     - name: "helm install stock api"
-  #       run: |
-  #         # twt stock
-  #         helm upgrade --install my-tt-stock -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/stock.api --set image.tag=$GITHUB_SHA $tailwindCharts/stock-api
-  #     - name: "helm install image classifier api"
-  #       run: |
-  #         # twt image classifier
-  #         helm upgrade --install my-tt-image-classifier -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/image-classifier.api --set image.tag=$GITHUB_SHA $tailwindCharts/image-classifier-api
-  #     - name: "helm install cart api"
-  #       run: |
-  #         # twt cart
-  #         helm upgrade --install my-tt-cart -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/cart.api --set image.tag=$GITHUB_SHA $tailwindCharts/cart-api --set B2C.clientID=none --set B2C.identityMetadata=none --set B2C.issuer=none --set B2C.policyName=none --set B2C.tenantID=none
-  #     - name: "helm install mobile bff api"
-  #       run: |
-  #         # twt mobile bff
-  #         helm upgrade --install my-tt-mobilebff -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/mobileapigw --set image.tag=$GITHUB_SHA --set probes.readiness=null $tailwindCharts/mobilebff
-  #         # helm upgrade --install my-tt-mobilebff -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=neilpeterson/mobileapigw --set image.tag=v2 --set probes.readiness=null $tailwindCharts/mobilebff
-  #     - name: "helm install web bff api"
-  #       run: |
-  #         # twt web bff
-  #         helm upgrade --install my-tt-webbff -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/webapigw --set image.tag=$GITHUB_SHA $tailwindCharts/webbff --set B2C.Authority=none --set B2C.B2CIssuer=none
-  #         # helm upgrade --install my-tt-webbff -f $tailwindChartValues --namespace=$nameSpace --set ingress.hosts={$INGRESS} --set image.repository=neilpeterson/webapigw --set image.tag=v2 $tailwindCharts/webbff --set B2C.Authority=none --set B2C.B2CIssuer=none
-  #     - name: "helm install web frontend"
-  #       run: |
-  #         # twt web
-  #         helm upgrade --install web -f TailwindTraders-Website/Deploy/helm/gvalues.yaml --namespace=$nameSpace --set ingress.protocol=http --set ingress.hosts={$INGRESS} --set image.repository=$CONTAINER_REGISTRY/web --set image.tag=$GITHUB_SHA TailwindTraders-Website/Deploy/helm/web/
   #     - name: "Label all pods for network policy"
   #       run: |
   #         # add label
-  #         kubectl label -n twt pods --all role=twt-app --overwrite=true
-  #     - name: "Copy website images to storage"
-  #       run: |
-  #         STORAGE=$(az storage account list -g $resourceGroup -o table --query  [].name -o tsv)
-  #         BLOB_ENDPOINT=$(az storage account list -g $resourceGroup --query [].primaryEndpoints.blob -o tsv)
-  #         CONNECTION_STRING=$(az storage account show-connection-string -n $STORAGE -g $resourceGroup -o tsv)
-  #         az storage container create --name "coupon-list" --public-access blob --connection-string $CONNECTION_STRING
-  #         az storage container create --name "product-detail" --public-access blob --connection-string $CONNECTION_STRING
-  #         az storage container create --name "product-list" --public-access blob --connection-string $CONNECTION_STRING
-  #         az storage container create --name "profiles-list" --public-access blob --connection-string $CONNECTION_STRING
-  #         az storage blob upload-batch --destination $BLOB_ENDPOINT --destination coupon-list  --source $tailwindWebImages/coupon-list --account-name $STORAGE
-  #         az storage blob upload-batch --destination $BLOB_ENDPOINT --destination product-detail --source $tailwindWebImages/product-detail --account-name $STORAGE
-  #         az storage blob upload-batch --destination $BLOB_ENDPOINT --destination product-list --source $tailwindWebImages/product-list --account-name $STORAGE
-  #         az storage blob upload-batch --destination $BLOB_ENDPOINT --destination profiles-list --source $tailwindWebImages/profiles-list --account-name $STORAGE
-  #     - name: "Setup scaling backend components"
-  #       run: |
-  #         # add kedacore repo
-  #         helm repo add kedacore https://kedacore.github.io/charts
-  #         # add stable repo for helm 3
-  #         helm repo add stable http://storage.googleapis.com/kubernetes-charts
-  #         # repo update
-  #         helm repo update
-  #         # keda install
-  #         helm upgrade --install keda kedacore/keda --namespace keda
-  #         # rabbitmq install
-  #         helm upgrade --install rabbitmq --set rabbitmq.username=user,rabbitmq.password=PASSWORD stable/rabbitmq
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Secret
-  #         metadata:
-  #           name: rabbitmq-consumer
-  #         data:
-  #           RabbitMqHost: YW1xcDovL3VzZXI6UEFTU1dPUkRAcmFiYml0bXEuZGVmYXVsdC5zdmMuY2x1c3Rlci5sb2NhbDo1Njcy
-  #         ---
-  #         apiVersion: apps/v1
-  #         kind: Deployment
-  #         metadata:
-  #           name: rabbitmq-consumer
-  #           namespace: default
-  #           labels:
-  #             app: rabbitmq-consumer
-  #         spec:
-  #           selector:
-  #             matchLabels:
-  #               app: rabbitmq-consumer
-  #           template:
-  #             metadata:
-  #               labels:
-  #                 app: rabbitmq-consumer
-  #             spec:
-  #               containers:
-  #               - name: rabbitmq-consumer
-  #                 image: jeffhollan/rabbitmq-client:dev
-  #                 imagePullPolicy: Always
-  #                 command:
-  #                   - receive
-  #                 args:
-  #                   - 'amqp://user:PASSWORD@rabbitmq.default.svc.cluster.local:5672'
-  #                 envFrom:
-  #                 - secretRef:
-  #                     name: rabbitmq-consumer
-  #               dnsPolicy: ClusterFirst
-  #               nodeSelector:
-  #                 kubernetes.io/role: agent
-  #                 beta.kubernetes.io/os: linux
-  #                 type: virtual-kubelet
-  #               tolerations:
-  #               - key: virtual-kubelet.io/provider
-  #                 operator: Exists
-  #               - key: azure.com/aci
-  #                 effect: NoSchedule
-  #         ---
-  #         apiVersion: keda.k8s.io/v1alpha1
-  #         kind: ScaledObject
-  #         metadata:
-  #           name: rabbitmq-consumer
-  #           annotations:
-  #             "helm.sh/hook": crd-install
-  #           namespace: default
-  #           labels:
-  #             deploymentName: rabbitmq-consumer
-  #         spec:
-  #           scaleTargetRef:
-  #             deploymentName: rabbitmq-consumer
-  #           pollingInterval: 5   # Optional. Default: 30 seconds
-  #           cooldownPeriod: 30   # Optional. Default: 300 seconds
-  #           maxReplicaCount: 30  # Optional. Default: 100
-  #           triggers:
-  #           - type: rabbitmq
-  #             metadata:
-  #               queueName: hello
-  #               host: RabbitMqHost
-  #               queueLength  : '5'
-  #         EOF
+  #         kubectl label -n twt pods --all role=spring-app --overwrite=true
+  #
   #     - name: "Notes"
   #       run: |
   #         INGRESS=$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)
