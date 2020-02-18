@@ -11,6 +11,19 @@
 	<name>websocket-demo</name>
 	<description>Spring Boot WebSocket Chat Demo</description>
 
+	<distributionManagement>
+    <repository>
+        <id>central</id>
+        <name>jfrogjd-releases</name>
+        <url>https://jfrogjd.jfrog.io/jfrogjd/libs-release</url>
+    </repository>
+    <snapshotRepository>
+        <id>snapshots</id>
+        <name>jfrogjd-snapshots</name>
+        <url>https://jfrogjd.jfrog.io/jfrogjd/libs-snapshot</url>
+    </snapshotRepository>
+	</distributionManagement>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
