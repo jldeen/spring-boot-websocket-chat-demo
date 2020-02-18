@@ -348,8 +348,8 @@ jobs:
       - name: "build/push chattybot"
         run: |
           echo ${{ secrets.ART_PASS }} | docker login $artDockerURL -u $ART_USER --password-stdin && echo "jfrog docker login successful"
-          docker build . -t $artDockerURL/chattybot:${{ github.sha }}
-          docker push $artDockerURL/chattybot:${{ github.sha }}
+          docker build . -t $artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}
+          docker push $artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}
 
       # helm lint
       - name: "helm lint"
@@ -367,7 +367,7 @@ jobs:
           ./jfrog rt build-collect-env $GITHUB_WORKFLOW $GITHUB_RUN_ID
 
           # --- Jfrog Docker Push
-          ./jfrog rt docker-push --server-id=$SERVER_ID --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID "$artDockerURL/$GITHUB_REPOSITORY:$GITHUB_RUN_ID" docker-dev
+          ./jfrog rt docker-push --server-id=$SERVER_ID --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID "$artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}" docker-dev
 
           # --- Upload Helm Chart Artifact to Artifactory
           ./jfrog rt upload --server-id=$SERVER_ID --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID "$GITHUB_WORKSPACE/*.tgz" helm-repo
