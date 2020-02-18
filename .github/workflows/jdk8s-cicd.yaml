@@ -382,7 +382,7 @@ jobs:
           ## Jfrog Build
           JF_BUILD=$(sed -n "s/^.*http/http/p" publish.txt)
 
-          curl -X POST --data-urlencode 'payload={"text":"Jfrog Artifactory Build ${{ GITHUB_RUN_ID }} Information","attachments":[{"fallback":"JFrog Artifactory Build ${{ GITHUB_RUN_ID }} Information","color":"#36a64f","author_link":"'$JF_BUILD'","title":"JFrog Build Artifacts","title_link":"'$JF_BUILD'","text":"Build Artifacts for ${{ GITHUB_RUN_ID }}","fields":[{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog Artifactory Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' ${{ secrets.SLACK_WEBHOOK_URL}} && echo "Slack Build Message Posted"
+          curl -X POST --data-urlencode 'payload={"text":"Jfrog Artifactory Build ${{GITHUB_RUN_ID}} Information","attachments":[{"fallback":"JFrog Artifactory Build ${{GITHUB_RUN_ID}} Information","color":"#36a64f","author_link":"'$JF_BUILD'","title":"JFrog Build Artifacts","title_link":"'$JF_BUILD'","text":"Build Artifacts for ${{GITHUB_RUN_ID}}","fields":[{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog Artifactory Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' ${{ secrets.SLACK_WEBHOOK_URL}} && echo "Slack Build Message Posted"
 
       - name: "slack xray trigger"
         run: |
@@ -398,7 +398,7 @@ jobs:
             slackStyle=danger && echo "Xray scan alerts found"
           fi
 
-          curl -X POST --data-urlencode 'payload={"text":"JFrog XRay Scan Report for Build $GITHUB_RUN_ID","attachments":[{"fallback":"JFrog XRay Scan Report for Build $GITHUB_RUN_ID","color":"'$slackStyle'","author_link":"'$JF_XRAY_RPT'","title":"JFrog XRay Scan Report","title_link":"'$JF_XRAY_RPT'","text":"JFrog Xray Scan Report for Build $GITHUB_RUN_ID","fields":[{"title":"XRay Alerts","value":"'$JF_XRAY_ALERTS' alerts were generated","short":false},{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog XRay Scan Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' ${{ secrets.SLACK_WEBHOOK_URL}} > /dev/null 2>&1 && echo "Slack XRay Message Posted"
+          curl -X POST --data-urlencode 'payload={"text":"JFrog XRay Scan Report for Build ${{GITHUB_RUN_ID}}","attachments":[{"fallback":"JFrog XRay Scan Report for Build ${{GITHUB_RUN_ID}}","color":"'$slackStyle'","author_link":"'$JF_XRAY_RPT'","title":"JFrog XRay Scan Report","title_link":"'$JF_XRAY_RPT'","text":"JFrog Xray Scan Report for Build ${{GITHUB_RUN_ID}}","fields":[{"title":"XRay Alerts","value":"'$JF_XRAY_ALERTS' alerts were generated","short":false},{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog XRay Scan Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' ${{ secrets.SLACK_WEBHOOK_URL}} > /dev/null 2>&1 && echo "Slack XRay Message Posted"
           #if [[ "'$JF_SCAN_FAIL'" = *true* ]]; then exit 1; else exit 0; fi
   # deployMicroservicesDEV:
   #   runs-on: self-hosted
