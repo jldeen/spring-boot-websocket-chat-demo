@@ -140,8 +140,6 @@ jobs:
           kubectl apply --validate=false \
           -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.13/deploy/manifests/00-crds.yaml
 
-          kubectl label namespace ingress certmanager.k8s.io/disable-validation=true
-
           helm repo add jetstack https://charts.jetstack.io
 
           helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
