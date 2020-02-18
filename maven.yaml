@@ -5,6 +5,6 @@ resolver:
   releaseRepo: libs-release
   serverID: jfrog-jd
 deployer:
-  snapshotRepo: libs-snapshot
-  releaseRepo: libs-release
+  snapshotRepo: libs-snapshot-local
+  releaseRepo: libs-release-local
   serverID: jfrog-jd
