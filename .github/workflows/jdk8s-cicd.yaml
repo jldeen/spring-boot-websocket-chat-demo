@@ -309,7 +309,7 @@ jobs:
     needs: deployInfra
     env:
       artDockerURL: jfrogjd-docker.jfrog.io
-      ART_URL: https://jfrogjd.jfrog.io/jfrogjd/
+      ART_URL: "https://jfrogjd.jfrog.io/jfrogjd/"
       ART_USER: admin
       SERVER_ID: jfrog-jd
       SLACK_CHANNEL: chattybot
