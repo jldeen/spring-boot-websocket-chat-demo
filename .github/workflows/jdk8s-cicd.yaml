@@ -368,7 +368,7 @@ jobs:
           ./jfrog rt build-add-git $GITHUB_WORKFLOW $GITHUB_RUN_ID $GITHUB_WORKSPACE
 
           # --- Jfrog Docker Push
-          ./jfrog rt docker-push --server-id=$SERVER_ID --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID "$artDocker_URL/$GITHUB_REPOSITORY:$GITHUB_RUN_ID" docker-dev
+          ./jfrog rt docker-push --server-id=$SERVER_ID --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID "$artDockerURL/$GITHUB_REPOSITORY:$GITHUB_RUN_ID" docker-dev
 
           # --- Upload Helm Chart Artifact to Artifactory
           ./jfrog rt upload --server-id=$SERVER_ID --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID "$GITHUB_WORKSPACE/*.tgz" helm-repo
