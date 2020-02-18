@@ -365,7 +365,7 @@ jobs:
           # --- JFrog Publish Build Info to Artifactory
           #./jfrog rt build-add-dependencies $GITHUB_WORKFLOW $GITHUB_RUN_ID "target/*.jar"
           ./jfrog rt build-collect-env $GITHUB_WORKFLOW $GITHUB_RUN_ID
-          ./jfrog rt build-add-git $GITHUB_WORKFLOW $GITHUB_RUN_ID
+          ./jfrog rt build-add-git $GITHUB_WORKFLOW $GITHUB_RUN_ID $GITHUB_WORKSPACE
 
           # --- Jfrog Docker Push
           ./jfrog rt docker-push --server-id=$SERVER_ID --build-name=$GITHUB_WORKFLOW --build-number=$GITHUB_RUN_ID "$artDocker_URL/$GITHUB_REPOSITORY:$GITHUB_RUN_ID" docker-dev
