@@ -1,7 +1,7 @@
 FROM maven:3-jdk-11 as BUILD
 
 COPY . /usr/src/app
-RUN mvn --batch-mode -f /usr/src/app/pom.xml clean package
+RUN mvn --batch-mode -U -f /usr/src/app/pom.xml clean package
 
 # FROM openjdk:11-jre-slim
 FROM jfrogjd-docker.jfrog.io/jldeen/alpine-jre-patched:latest
