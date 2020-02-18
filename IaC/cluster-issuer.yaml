@@ -6,7 +6,6 @@ metadata:
 spec:
   acme:
     email: jessde@microsoft.com
-    http01: {}
     privateKeySecretRef:
       key: ""
       name: letsencrypt-prod
