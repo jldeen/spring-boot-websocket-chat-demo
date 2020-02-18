@@ -14,7 +14,7 @@ steps:
 
   jFrogMavenBuild:
     title: Use Jfrog special build to make jar
-    image: jldeen/docker-jfrog-cli-java:1.0.3
+    image: jldeen/docker-jfrog-cli-java:1.0.4
     shell: bash
     stage: "build"
     commands:
@@ -68,7 +68,7 @@ steps:
           command: sh -c "exit 0"
     composition_candidates:
       dockerinfo_upload:
-        image: jldeen/docker-jfrog-cli-java:1.0.3
+        image: jldeen/docker-jfrog-cli-java:1.0.4
         working_dir: ${{CF_VOLUME_PATH}}/${{CF_REPO_NAME}}
         environment:
           - JFROG_CLI_OFFER_CONFIG=false
@@ -101,7 +101,7 @@ steps:
 
   security_scan:
     title: Xray Security Scan
-    image: jldeen/docker-jfrog-cli-java:1.0.3
+    image: jldeen/docker-jfrog-cli-java:1.0.4
     stage: "test"
     shell: bash
     commands:
@@ -142,7 +142,7 @@ steps:
 
   SendScanToSlack:
     title: Send xray info to Slack
-    image: jldeen/docker-jfrog-cli-java:1.0.3
+    image: jldeen/docker-jfrog-cli-java:1.0.4
     stage: "test"
     shell: bash
     commands:

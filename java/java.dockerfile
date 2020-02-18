@@ -26,7 +26,7 @@ ENV JFROG_CLI_OFFER_CONFIG false
 
 # Update Jfrog CLI
 RUN curl -fL https://getcli.jfrog.io | sh \
-    && mv jfrog /usr/local/bin
+  && mv jfrog /usr/local/bin
 
 COPY docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
