@@ -322,6 +322,7 @@ jobs:
           else
               echo "Jfrog binary does not exist. Downloading now...."
               curl -fL https://getcli.jfrog.io | sh
+              sudo mv jfrog /usr/local/bin
           fi
 
           # Configure Jfrog CLI
