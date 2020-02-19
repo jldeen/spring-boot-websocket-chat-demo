@@ -20,9 +20,9 @@ steps:
     commands:
       - export M2_HOME=/usr/share/maven
       - jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}} --interactive=false
-      - jfrog rt mvn "clean install -U -Dproject.version=${{CF_BUILD_ID}} -Dartifactory.publish.buildInfo=true" --build-name=${{CF_REPO_NAME}} --build-number=${{CF_BUILD_ID}}
-      - jfrog rt build-collect-env ${{CF_REPO_NAME}} ${{CF_BUILD_ID}}
-      - jfrog rt build-publish ${{CF_REPO_NAME}} ${{CF_BUILD_ID}}
+      - jfrog rt mvn "clean install -U -Dproject.version=${{CF_BUILD_ID}} -Dartifactory.publish.buildInfo=true" --build-name=${{CF_REPO_NAME}}-2020 --build-number=${{CF_BUILD_ID}}
+      - jfrog rt build-collect-env ${{CF_REPO_NAME}}-2020 ${{CF_BUILD_ID}}
+      - jfrog rt build-publish ${{CF_REPO_NAME}}-2020 ${{CF_BUILD_ID}}
 
   BuildingDockerImage:
     title: Building Docker Image
@@ -80,17 +80,17 @@ steps:
               jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}} --interactive=false
 
           # --- JFrog Publish Build Info to Artifactory
-              jfrog rt build-collect-env ${{CF_REPO_NAME}} ${{CF_BUILD_ID}}
-              jfrog rt build-add-git ${{CF_REPO_NAME}} ${{CF_BUILD_ID}}
+              jfrog rt build-collect-env ${{CF_REPO_NAME}}-2020 ${{CF_BUILD_ID}}
+              jfrog rt build-add-git ${{CF_REPO_NAME}}-2020 ${{CF_BUILD_ID}}
 
           # --- Jfrog Docker Push
-              jfrog rt docker-push --server-id=${{JFROG_SERVER_ID}} --build-name=${{CF_REPO_NAME}} --build-number=${{CF_BUILD_ID}} "${{REPOSITORY}}:${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}" docker-dev
+              jfrog rt docker-push --server-id=${{JFROG_SERVER_ID}} --build-name=${{CF_REPO_NAME}}-2020 --build-number=${{CF_BUILD_ID}} "${{REPOSITORY}}:${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}" docker-dev
 
           # --- Upload Helm Chart Artifact to Artifactory
-              jfrog rt upload --build-name=${{CF_REPO_NAME}} --build-number=${{CF_BUILD_ID}} "$PACKAGE" helm-repo
+              jfrog rt upload --build-name=${{CF_REPO_NAME}}-2020 --build-number=${{CF_BUILD_ID}} "$PACKAGE" helm-repo
 
           # -- build publish
-              jfrog rt build-publish --build-url="${{CF_BUILD_URL}}" --env-exclude="*key*;*pass*;" ${{CF_REPO_NAME}} ${{CF_BUILD_ID}} |& tee publish.txt
+              jfrog rt build-publish --build-url="${{CF_BUILD_URL}}" --env-exclude="*key*;*pass*;" ${{CF_REPO_NAME}}-2020 ${{CF_BUILD_ID}} |& tee publish.txt
               codefresh auth create-context --api-key ${{CODEFRESH_CLI_KEY}}
               export JF_BUILD="$$(sed -n "s/^.*http/http/p" publish.txt)"
               codefresh annotate image jldeen/chattybot:${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}} --label JF_BUILD="$$(sed -n "s/^.*http/http/p" publish.txt)"'
@@ -106,7 +106,7 @@ steps:
     shell: bash
     commands:
       - jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}} --interactive=false
-      - jfrog rt build-scan --server-id=${{JFROG_SERVER_ID}} ${{CF_REPO_NAME}} ${{CF_BUILD_ID}} | tee results.json
+      - jfrog rt build-scan --server-id=${{JFROG_SERVER_ID}} ${{CF_REPO_NAME}}-2020 ${{CF_BUILD_ID}} | tee results.json
       - export JF_BUILD=$(sed -n "s/^.*http/http/p" publish.txt)
       - export JF_XRAY_ALERTS=$(jq ".summary.total_alerts" results.json)
       - export JF_XRAY_MSG=$(jq ".summary.message" results.json)
