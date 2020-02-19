@@ -156,16 +156,16 @@ stages:
 
                 - task: HelmDeploy@0
                   inputs:
-                    connectionType: "Azure Resource Manager"
-                    azureSubscription: "ca-jessde-demo-test(dfb5d696-98d8-447c-a14d-56f131f3c4a5)"
-                    azureResourceGroup: "jdk8s"
-                    kubernetesCluster: "jdk8saks3qpc7haiwjlfa"
-                    namespace: "jfrog"
-                    command: "upgrade"
-                    chartType: "FilePath"
-                    chartPath: "$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz"
-                    releaseName: "azdspring-dev"
-                    overrideValues: "image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=azdspring20-dev.k8s.az.jessicadeen.com,buildID=$(Build.BuildId)"
+                    connectionType: 'Azure Resource Manager'
+                    azureSubscription: 'ca-jessde-demo-test(dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
+                    azureResourceGroup: 'jdk8s'
+                    kubernetesCluster: 'jdk8saks3qpc7haiwjlfa'
+                    namespace: 'jfrog'
+                    command: 'upgrade'
+                    chartType: 'FilePath'
+                    chartPath: '$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz'
+                    releaseName: 'azdspring-dev'
+                    overrideValues: 'image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=azdspring20-dev.k8s.az.jessicadeen.com,buildID=$(Build.BuildId)'
 
   - stage: PromoteToProd
     displayName: Promote to Prod
@@ -200,13 +200,13 @@ stages:
 
                 - task: HelmDeploy@0
                   inputs:
-                    connectionType: "Azure Resource Manager"
-                    azureSubscription: "ca-jessde-demo-test(dfb5d696-98d8-447c-a14d-56f131f3c4a5)"
-                    azureResourceGroup: "jdk8s"
-                    kubernetesCluster: "jdk8saks3qpc7haiwjlfa"
-                    namespace: "jfrog-prod"
-                    command: "upgrade"
-                    chartType: "FilePath"
-                    chartPath: "$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz"
-                    releaseName: "azdspring-prod"
-                    overrideValues: "image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=azdspring20.k8s.az.jessicadeen.com,buildID=$(Build.BuildId)"
+                    connectionType: 'Azure Resource Manager'
+                    azureSubscription: 'ca-jessde-demo-test(dfb5d696-98d8-447c-a14d-56f131f3c4a5)'
+                    azureResourceGroup: 'jdk8s'
+                    kubernetesCluster: 'jdk8saks3qpc7haiwjlfa'
+                    namespace: 'jfrog-prod'
+                    command: 'upgrade'
+                    chartType: 'FilePath'
+                    chartPath: '$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz'
+                    releaseName: 'azdspring-prod'
+                    overrideValues: 'image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=azdspring20.k8s.az.jessicadeen.com,buildID=$(Build.BuildId)'
