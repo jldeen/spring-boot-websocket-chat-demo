@@ -428,6 +428,30 @@ jobs:
         run: |
           # add label
           kubectl label -n $nameSpace pods --all role=spring-app-dev --overwrite=true
+  deployMicroservicesProd:
+    runs-on: self-hosted
+    needs: buildImages
+    env:
+      nameSpace: jfrog-prod
+      artDockerURL: jfrogjd-docker.jfrog.io
+    steps:
+      - name: "configure deployment environment"
+        run: |
+          # set for this step
+          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
+          # persist env vars
+          echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
+          echo "::set-env name=INGRESS::$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)"
+
+      - name: "helm install chattybot prod"
+        run: |
+          # spring deploy
+          helm upgrade --install chattybot $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=ghchattybot.k8s.az.jessicadeen.com --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
+
+      - name: "Label all pods for network policy"
+        run: |
+          # add label
+          kubectl label -n $nameSpace pods --all role=spring-app-prod --overwrite=true
   #
   #     - name: "Notes"
   #       run: |
