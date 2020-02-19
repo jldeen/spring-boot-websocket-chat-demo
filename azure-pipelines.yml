@@ -14,8 +14,6 @@ variables:
   server-id: "jfrog-jd"
   # art url
   ART_URL: "https://jfrogjd.jfrog.io/jfrogjd"
-  # slack channel
-  slackChannel: "chattybot"
 
 stages:
   - stage: Build
