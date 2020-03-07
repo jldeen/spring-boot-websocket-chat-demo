@@ -17,7 +17,7 @@ public class ChattyBotTests extends BaseTests {
     @BeforeClass
     public static void setSuite(){
         System.out.println("In setSuite()");
-        _testStartPage = System.getEnv().get("TEST_START_PAGE");
+        _testStartPage = System.getenv().get("TEST_START_PAGE");
         System.out.println("test start page: " + _testStartPage);
         eyes.setBatch(new BatchInfo("ChattyBot"));
         System.out.println("Done with setSuite()");
