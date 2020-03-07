@@ -170,10 +170,18 @@ stages:
                 
                 - bash: |
                     ## set api key
-                    export APPLITOOLS_API_KEY=$(APPLITOOLS_API_KEY)
+                    echo "Applitools key in environment variable"
+                    echo $APPLITOOLS_API_KEY
                     cd visual_tests && \
                     mvn clean test
                   displayName: "Visual Testing"
+
+                # - bash: |
+                #     ## set api key
+                #     export APPLITOOLS_API_KEY=$(APPLITOOLS_API_KEY)
+                #     cd visual_tests && \
+                #     mvn clean test
+                #   displayName: "Visual Testing"                  
 
                 # - task: Maven@3
                 #   inputs:
