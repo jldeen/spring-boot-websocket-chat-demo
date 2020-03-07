@@ -167,6 +167,12 @@ stages:
                     chartPath: "$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz"
                     releaseName: "azdspring-dev"
                     overrideValues: "image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=azdspring20-dev.k8s.az.jessicadeen.com,buildID=$(Build.BuildId)"
+                
+                - task: Bash@3
+                  inputs:
+                    targetType: 'inline'
+                    script: 'export APPLITOOLS_API_KEY=$(APPLITOOLS_API_KEY)'
+                  displayName: "Setup Applitools Local Environment"
 
                 - task: Maven@3
                   inputs:
