@@ -135,7 +135,6 @@ stages:
           # name: work-machine
           name: jldeenlinux
         environment: "chattybot-dev"
-        variables:
         strategy:
           runOnce:
             deploy:
