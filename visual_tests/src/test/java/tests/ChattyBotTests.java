@@ -1,7 +1,5 @@
 package tests;
 
-import java.util;
-
 import com.applitools.eyes.BatchInfo;
 
 import org.junit.Before;
@@ -18,8 +16,7 @@ public class ChattyBotTests extends BaseTests {
     @BeforeClass
     public static void setSuite(){
         System.out.println("In setSuite()");
-        Map<String, String> env = System.getEnv();
-        _testStartPage = env.get("TEST_START_PAGE");
+        _testStartPage = System.getEnv().get("TEST_START_PAGE");
         System.out.println("test start page: " + _testStartPage);
         eyes.setBatch(new BatchInfo("ChattyBot"));
         System.out.println("Done with setSuite()");
