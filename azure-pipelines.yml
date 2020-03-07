@@ -178,8 +178,7 @@ stages:
                 #   env:
                 #     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
 
-                - displayName: "Visual Testing"
-                  task: Maven@3
+                - task: Maven@3
                   inputs:
                     mavenPomFile: 'visual_tests/pom.xml'
                     goals: 'test'
@@ -193,6 +192,7 @@ stages:
                     sonarQubeRunAnalysis: false
                   env:
                     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
+                  displayName: "Visual Testing"
 
   - stage: PromoteToProd
     displayName: Promote to Prod
