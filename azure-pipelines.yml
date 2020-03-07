@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - master
+      - applitools
 
 variables:
   # Agent VM image name
