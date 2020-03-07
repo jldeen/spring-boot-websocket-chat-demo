@@ -170,7 +170,7 @@ stages:
 
                 - task: Maven@3
                   inputs:
-                    mavenPomFile: '$(System.ArtifactsDirectory)/visual_tests/pom.xml'
+                    mavenPomFile: 'visual_tests/pom.xml'
                     goals: 'test'
                     options: 'clean test'
                     publishJUnitResults: true
