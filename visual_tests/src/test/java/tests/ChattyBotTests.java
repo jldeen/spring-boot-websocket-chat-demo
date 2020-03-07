@@ -11,7 +11,8 @@ import pages.ChatPage;
 public class ChattyBotTests extends BaseTests {
 
     private ChatPage chatPage;
-    private String _testStartPage;
+
+    private static String _testStartPage;
 
     @BeforeClass
     public static void setSuite(){
