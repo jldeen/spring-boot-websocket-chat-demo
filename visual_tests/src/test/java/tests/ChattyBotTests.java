@@ -11,18 +11,26 @@ import pages.ChatPage;
 public class ChattyBotTests extends BaseTests {
 
     private ChatPage chatPage;
+    private String _testStartPage;
 
     @BeforeClass
     public static void setSuite(){
-        System.out.println("In Test Suite setSuite()");
+        System.out.println("In setSuite()");
+        Map<String, String> env = System.getenv();
+        _testStartPage = env.get("TEST_START_PAGE");
+        System.out.println("test start page: " + _testStartPage);
         eyes.setBatch(new BatchInfo("ChattyBot"));
+        System.out.println("Done with setSuite()");
     }
 
     @Before 
     public void startSession(){
+        System.out.println("In startSession()");
+        System.out.println("test start page: " + _testStartPage);
         driver.get("https://cf-chattybot.k8s.az.jessicadeen.com/");
         homePage.enterUsername("angie");
         chatPage = homePage.clickStartChatting();
+        System.out.println("Done with startSession()");
     }
 
      @Test 
