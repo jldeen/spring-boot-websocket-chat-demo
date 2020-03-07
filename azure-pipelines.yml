@@ -135,6 +135,8 @@ stages:
           # name: work-machine
           name: jldeenlinux
         environment: "chattybot-dev"
+        variables:
+          APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
         strategy:
           runOnce:
             deploy:
