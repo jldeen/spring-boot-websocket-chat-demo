@@ -168,15 +168,15 @@ stages:
                     releaseName: "azdspring-dev"
                     overrideValues: "image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=azdspring20-dev.k8s.az.jessicadeen.com,buildID=$(Build.BuildId)"
                 
-                - bash: |
-                    ## testing env variable
-                    echo "Applitools key in environment variable"
-                    echo $APPLITOOLS_API_KEY
-                    cd visual_tests && \
-                    mvn clean test
-                  displayName: "Visual Testing"
-                  env:
-                    APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
+                # - bash: |
+                #     ## testing env variable
+                #     echo "Applitools key in environment variable"
+                #     echo $APPLITOOLS_API_KEY
+                #     cd visual_tests && \
+                #     mvn clean test
+                #   displayName: "Visual Testing"
+                #   env:
+                #     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
 
                 # - bash: |
                 #     ## set api key
@@ -185,18 +185,20 @@ stages:
                 #     mvn clean test
                 #   displayName: "Visual Testing"                  
 
-                # - task: Maven@3
-                #   inputs:
-                #     mavenPomFile: 'visual_tests/pom.xml'
-                #     goals: 'test'
-                #     options: 'clean test'
-                #     publishJUnitResults: true
-                #     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-                #     javaHomeOption: 'JDKVersion'
-                #     mavenVersionOption: 'Default'
-                #     mavenAuthenticateFeed: false
-                #     effectivePomSkip: false
-                #     sonarQubeRunAnalysis: false
+                - task: Maven@3
+                  inputs:
+                    mavenPomFile: 'visual_tests/pom.xml'
+                    goals: 'test'
+                    options: 'clean test'
+                    publishJUnitResults: true
+                    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+                    javaHomeOption: 'JDKVersion'
+                    mavenVersionOption: 'Default'
+                    mavenAuthenticateFeed: false
+                    effectivePomSkip: false
+                    sonarQubeRunAnalysis: false
+                  env:
+                    APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
 
   - stage: PromoteToProd
     displayName: Promote to Prod
