@@ -16,21 +16,15 @@ public class ChattyBotTests extends BaseTests {
 
     @BeforeClass
     public static void setSuite(){
-        System.out.println("In setSuite()");
         _testStartPage = System.getenv().get("TEST_START_PAGE");
-        System.out.println("test start page: " + _testStartPage);
         eyes.setBatch(new BatchInfo("ChattyBot"));
-        System.out.println("Done with setSuite()");
     }
 
     @Before 
     public void startSession(){
-        System.out.println("In startSession()");
-        System.out.println("test start page: " + _testStartPage);
-        driver.get("_testStartPage");
+        driver.get(_testStartPage);
         homePage.enterUsername("angie");
         chatPage = homePage.clickStartChatting();
-        System.out.println("Done with startSession()");
     }
 
      @Test 
