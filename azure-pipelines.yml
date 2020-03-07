@@ -169,7 +169,7 @@ stages:
                     overrideValues: "image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=azdspring20-dev.k8s.az.jessicadeen.com,buildID=$(Build.BuildId)"
                 
                 - bash: |
-                    ## set api key
+                    ## testing env variable
                     echo "Applitools key in environment variable"
                     echo $APPLITOOLS_API_KEY
                     cd visual_tests && \
