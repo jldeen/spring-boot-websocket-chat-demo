@@ -27,7 +27,7 @@ public class ChattyBotTests extends BaseTests {
     public void startSession(){
         System.out.println("In startSession()");
         System.out.println("test start page: " + _testStartPage);
-        driver.get("https://cf-chattybot.k8s.az.jessicadeen.com/");
+        driver.get("_testStartPage");
         homePage.enterUsername("angie");
         chatPage = homePage.clickStartChatting();
         System.out.println("Done with startSession()");
