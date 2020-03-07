@@ -14,6 +14,7 @@ public class ChattyBotTests extends BaseTests {
 
     @BeforeClass
     public static void setSuite(){
+        System.out.println("In Test Suite setSuite()");
         eyes.setBatch(new BatchInfo("ChattyBot"));
     }
 
