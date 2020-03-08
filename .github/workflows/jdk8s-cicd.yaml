@@ -440,7 +440,6 @@ jobs:
           
       - name: "Visual Testing"
         run: |
-          alias mvn="/usr/bin/mvn"
           # mvn -version
           mvn -version
 
