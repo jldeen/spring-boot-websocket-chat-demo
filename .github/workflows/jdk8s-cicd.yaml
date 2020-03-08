@@ -436,7 +436,7 @@ jobs:
           echo ":set-env name=APPLITOOLS_SERVER_URL=https://eyes.applitools.com && echo 'Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL'"
 
           # set batch sequence
-          echo ":set-env name=APPLITOOLS_BATCH_SEQUENCE=GitHub Actions / ${{ github.workflow }} && echo 'Setting environment variable AAPPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE'"
+          echo ":set-env name=APPLITOOLS_BATCH_SEQUENCE=GitHub Actions / ${{ github.workflow }} && echo 'Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE'"
           
       - name: "Visual Testing"
         run: |
@@ -444,7 +444,7 @@ jobs:
           mvn -version
 
           # set JAVA_HOME
-          # export JAVA_HOME=/usr/lib/jvm/java-13-oracle
+          export JAVA_HOME=/usr/lib/jvm/java-13-oracle
 
           # mvn clean test
           cd visual_tests && \
