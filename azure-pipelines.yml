@@ -177,7 +177,8 @@ stages:
                 #   displayName: "Visual Testing"
                 #   env:
                 #     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
-
+                - task: ApplitoolsBuildTask@0
+                
                 - task: Maven@3
                   inputs:
                     mavenPomFile: 'visual_tests/pom.xml'
@@ -193,8 +194,6 @@ stages:
                   env:
                     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
                   displayName: "Visual Testing"
-                
-                - task: ApplitoolsBuildTask@0
 
   - stage: PromoteToProd
     displayName: Promote to Prod
