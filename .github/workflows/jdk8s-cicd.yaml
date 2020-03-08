@@ -426,25 +426,45 @@ jobs:
       - name: Applitools Build Task
         run: |
           # set batch ID
-          echo "::set-env name=APPLITOOLS_BATCH_ID=${{ github.run_id }} && echo 'Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID'"
+          APPLITOOLS_BATCH_ID=${{ github.run_id }}
+
+          echo "::set-env name=APPLITOOLS_BATCH_ID::${{ github.run_id }}"
+          
+          echo "Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID"
 
           # set batch name
+          APPLITOOLS_BATCH_NAME="GitHub Actions / ${{ github.workflow }}"
 
-          echo "::set-env name=APPLITOOLS_BATCH_NAME=GitHub Actions / ${{ github.workflow }} && echo 'Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME'"
+          echo "::set-env name=APPLITOOLS_BATCH_NAME::GitHub Actions / ${{ github.workflow }}"
+          
+          echo "Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME"
 
           # set server url
-          echo ":set-env name=APPLITOOLS_SERVER_URL=https://eyes.applitools.com && echo 'Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL'"
+          APPLITOOLS_SERVER_URL="https://eyes.applitools.com"
+
+          echo "::set-env name=APPLITOOLS_SERVER_URL::https://eyes.applitools.com"
+          
+          echo "Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL"
 
           # set batch sequence
-          echo ":set-env name=APPLITOOLS_BATCH_SEQUENCE=GitHub Actions / ${{ github.workflow }} && echo 'Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE'"
+          APPLITOOLS_BATCH_SEQUENCE="GitHub Actions / ${{ github.workflow }}"
+
+          echo "::set-env name=APPLITOOLS_BATCH_SEQUENCE::GitHub Actions / ${{ github.workflow }}"
           
+          echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
+      
+      - name: Set up JDK 13
+        uses: actions/setup-java@v1
+        with:
+          java-version: '13' 
+
       - name: "Visual Testing"
         run: |
           # mvn -version
           mvn -version
 
           # set JAVA_HOME
-          export JAVA_HOME=/usr/lib/jvm/java-13-oracle
+          # export JAVA_HOME=/usr/lib/jvm/java-13-oracle
 
           # mvn clean test
           cd visual_tests && \
