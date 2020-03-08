@@ -193,6 +193,8 @@ stages:
                   env:
                     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
                   displayName: "Visual Testing"
+                
+                - task: ApplitoolsBuildTask@0
 
   - stage: PromoteToProd
     displayName: Promote to Prod
