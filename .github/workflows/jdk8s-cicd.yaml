@@ -421,6 +421,12 @@ jobs:
           # spring deploy
           helm upgrade --install chattybot-dev $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=ghchattybot-dev.k8s.az.jessicadeen.com --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
 
+      - name: "Visual Testing"
+        run: |
+          # mvn clean test
+          cd visual_tests && \
+          mvn clean test
+
       - name: "Label all pods for network policy"
         run: |
           # add label
