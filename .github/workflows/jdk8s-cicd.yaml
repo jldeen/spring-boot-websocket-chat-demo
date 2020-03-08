@@ -414,6 +414,7 @@ jobs:
         run: |
           # set for this step
           AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
+
           # persist env vars
           echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
           echo "::set-env name=INGRESS::$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)"
@@ -425,26 +426,27 @@ jobs:
       - name: Applitools Build Task
         run: |
           # set batch ID
-          export APPLITOOLS_BATCH_ID=${{ github.run_id }} && echo "Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID"
+          echo "::set-env name=APPLITOOLS_BATCH_ID=${{ github.run_id }} && echo 'Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID'"
 
           # set batch name
 
-          export APPLITOOLS_BATCH_NAME="GitHub Actions / ${{ github.workflow }}" && echo "Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME"
+          echo "::set-env name=APPLITOOLS_BATCH_NAME=GitHub Actions / ${{ github.workflow }} && echo 'Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME'"
 
           # set server url
-          export APPLITOOLS_SERVER_URL=https://eyes.applitools.com && echo "Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL"
+          echo ":set-env name=APPLITOOLS_SERVER_URL=https://eyes.applitools.com && echo 'Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL'"
 
           # set batch sequence
-          export APPLITOOLS_BATCH_SEQUENCE="GitHub Actions / ${{ github.workflow }}" && echo "Setting environment variable AAPPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
+          echo ":set-env name=APPLITOOLS_BATCH_SEQUENCE=GitHub Actions / ${{ github.workflow }} && echo 'Setting environment variable AAPPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE'"
           
       - name: "Visual Testing"
         run: |
+          alias mvn="/usr/bin/mvn"
           # mvn -version
           mvn -version
 
           # set JAVA_HOME
-          export JAVA_HOME=/usr/lib/jvm/java-13-oracle
-          
+          # export JAVA_HOME=/usr/lib/jvm/java-13-oracle
+
           # mvn clean test
           cd visual_tests && \
           mvn clean test
