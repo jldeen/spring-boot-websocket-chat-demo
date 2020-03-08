@@ -283,9 +283,10 @@ jobs:
 
       - name: "Notes"
         run: |
-          INGRESS=$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)
+          INGRESS=$(kubectl get svc -n ingress -o json | jq -r ".items[0].spec.clusterIP")
+
           echo "*************** Connection Information ***************"
-          echo "The Tailwind Traders Website can be accessed at:"
+          echo "The NGNIX Ingress Controller Public IP address is:"
           echo "http://{$INGRESS}"
           echo ""
           echo "Run the following to connect to the AKS cluster:"
