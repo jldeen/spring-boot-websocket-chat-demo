@@ -457,7 +457,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '13'
-        run: mvn -f visual_tests/pom.xml clean test
+      - run: mvn -f visual_tests/pom.xml clean test
 
       - name: "Label all pods for network policy"
         run: |
