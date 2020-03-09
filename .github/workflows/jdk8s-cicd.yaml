@@ -469,7 +469,7 @@ jobs:
       - name: "Visual Testing"
         env:
           APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}
-          TEST_START_PAGE: "https://$hostname"    
+          TEST_START_PAGE: https://$hostname
         run: mvn -f visual_tests/pom.xml clean test test
 
       - name: "Label all pods for network policy"
@@ -483,6 +483,7 @@ jobs:
     env:
       nameSpace: jfrog-prod
       artDockerURL: jfrogjd-docker.jfrog.io
+      hostname: ghchattybot.k8s.az.jessicadeen.com
     steps:
       - name: "configure deployment environment"
         run: |
@@ -495,7 +496,7 @@ jobs:
       - name: "helm install chattybot prod"
         run: |
           # spring deploy
-          helm upgrade --install chattybot $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=ghchattybot.k8s.az.jessicadeen.com --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set replicaCount=3 --set buildID=$GITHUB_RUN_ID
+          helm upgrade --install chattybot $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=$hostname --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set replicaCount=3 --set buildID=$GITHUB_RUN_ID
 
       - name: "Label all pods for network policy"
         run: |
