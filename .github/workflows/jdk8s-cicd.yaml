@@ -17,306 +17,8 @@ env:
   Infrastructure: IaC/deployment.json
 
 jobs:
-  # deployInfra:
-  #   runs-on: self-hosted
-  #   steps:
-  #     # checkout branch
-  #     - name: git checkout branch
-  #       uses: actions/checkout@v2
-  #       with:
-  #         ref: applitools
-  #         clean: 'true'
-
-  #     # log into Azure
-  #     - name: "Login via Azure CLI"
-  #       uses: azure/login@v1
-  #       with:
-  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-  #     # create resource group
-  #     - name: "Create Resource Group"
-  #       run: |
-  #         az group create --subscription "$subName" --name $resourceGroup --location $location --tags Tracking=$SESSION_TRACKING CreatedBy=$USER_ID
-
-  #     # create VNet
-  #     - name: "Create Virtual Network"
-  #       run: |
-  #         # run check for idempotent pipeline
-  #         vnetCheck=$(az network vnet list -g $resourceGroup -o tsv --query [0].name)
-  #         if [[  $vnetCheck == *$vnetName*  ]]; then
-  #           echo 'Virtual Network already exists'
-  #         else
-  #           echo 'Virtual network does not exist. Creating virtual network now.'
-  #           # create vnet
-  #           az network vnet create --resource-group $resourceGroup --name $vnetName --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name $subnetName --subnet-prefix 10.240.0.0/16
-  #         fi
-
-  #     # create virtual node subnet
-  #     - name: "Create Virtual Node Subnet"
-  #       run: |
-  #         # run check for idempotent pipeline
-  #         vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name $vnetName -o tsv --query '[1].name')
-
-  #         if [[  $vnetSubnetCheck == *$vnodeSubnetName* ]]; then
-  #           echo 'Virtual node subnet already exists'
-  #         else
-  #           echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
-  #           # configure vnet subnet
-  #           az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnetName --address-prefix 10.241.0.0/16
-  #         fi
-
-  #     #  Deploy backend infrastructure
-  #     - name: "Setup Backend Infra"
-  #       env:
-  #         azureClientID: 47e460d8-c66e-4489-85dd-ee2b522aaea5
-  #       run: |
-  #         vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name $subnetName --query id -o tsv)
-
-  #         az group deployment create -g $resourceGroup --template-file $Infrastructure \
-  #           --parameters servicePrincipalId=$azureClientID servicePrincipalSecret=${{ secrets.CLIENT_SECRET }} \
-  #           aksVersion=1.14.8 vnetSubnetID=$vnetID
-
-  #         echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
-
-  #         AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
-
-  #         az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin --overwrite-existing
-
-  #     # Setup virutal node
-  #     - name: "Install Virtual Node on K8s cluster"
-  #       run: |
-  #         vNodeEnabledCheck=$(az aks show --resource-group $resourceGroup --name $AKS_CLUSTER --query addonProfiles.aciConnectorLinux.enabled -o tsv)
-  #         if [[ $vNodeEnabledCheck == *true*  ]]; then
-  #           echo "AKS Virtual Node add-on already enabled."
-  #         else
-  #           # Deploy virtual node
-  #           az aks enable-addons \
-  #           --resource-group $resourceGroup  \
-  #           --name $AKS_CLUSTER \
-  #           --addons virtual-node \
-  #           --subnet-name $vnodeSubnetName
-  #         fi
-
-  #     # Ngnix for production
-  #     - name: "Configure Ngnix for production"
-  #       env:
-  #         nameSpace: ingress
-  #       run: |
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         EOF
-
-  #         helm repo add stable http://storage.googleapis.com/kubernetes-charts
-
-  #         helm repo update
-
-  #         helm upgrade --install nginx-ingress stable/nginx-ingress \
-  #         --namespace $nameSpace \
-  #         --set controller.replicaCount=2 \
-  #         --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
-  #         --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
-
-  #     - name: "Create cert manager namespace"
-  #       env:
-  #         nameSpace: cert-manager
-  #       run: |
-  #         # cert manager namespace
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         EOF
-
-  #     - name: "Jetstack Cert Manager Config"
-  #       run: |
-  #         kubectl apply --validate=false \
-  #         -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.13/deploy/manifests/00-crds.yaml
-
-  #         helm repo add jetstack https://charts.jetstack.io
-
-  #         helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
-
-  #         kubectl apply -f IaC/cluster-issuer.yaml
-
-  #     - name: "Create jfrog-dev namespace/secret"
-  #       env:
-  #         secretName: jdk8s
-  #         nameSpace: jfrog
-  #       run: |
-  #         # jfrog dev namespace
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         ---
-  #         apiVersion: v1
-  #         kind: Secret
-  #         metadata:
-  #           name: $secretName
-  #           namespace: $nameSpace
-  #         type:  kubernetes.io/dockerconfigjson
-  #         data:
-  #           .dockerconfigjson: ${{ secrets.DOCKER_CFG }}
-  #         EOF
-
-  #     - name: "Create jfrog-prod namespace/secret"
-  #       env:
-  #         secretName: jdk8s
-  #         nameSpace: jfrog-prod
-  #       run: |
-  #         # jfrog prod namespace
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         ---
-  #         apiVersion: v1
-  #         kind: Secret
-  #         metadata:
-  #           name: $secretName
-  #           namespace: $nameSpace
-  #         type:  kubernetes.io/dockerconfigjson
-  #         data:
-  #           .dockerconfigjson: ${{ secrets.DOCKER_CFG }}
-  #         EOF
-
-  #     - name: "Create keda namespace"
-  #       env:
-  #         nameSpace: keda
-  #       run: |
-  #         # keda namespace
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         EOF
-
-  #     - name: "Setup scaling backend components"
-  #       run: |
-  #         # add kedacore repo
-  #         helm repo add kedacore https://kedacore.github.io/charts
-
-  #         # add stable repo for helm 3
-  #         helm repo add stable http://storage.googleapis.com/kubernetes-charts
-
-  #         # repo update
-  #         helm repo update
-
-  #         # keda install
-  #         helm upgrade --install keda kedacore/keda --namespace keda
-
-  #         # rabbitmq install
-  #         helm upgrade --install rabbitmq --set rabbitmq.username=user,rabbitmq.password=PASSWORD stable/rabbitmq
-
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Secret
-  #         metadata:
-  #           name: rabbitmq-consumer
-  #         data:
-  #           RabbitMqHost: YW1xcDovL3VzZXI6UEFTU1dPUkRAcmFiYml0bXEuZGVmYXVsdC5zdmMuY2x1c3Rlci5sb2NhbDo1Njcy
-  #         ---
-  #         apiVersion: apps/v1
-  #         kind: Deployment
-  #         metadata:
-  #           name: rabbitmq-consumer
-  #           namespace: default
-  #           labels:
-  #             app: rabbitmq-consumer
-  #         spec:
-  #           selector:
-  #             matchLabels:
-  #               app: rabbitmq-consumer
-  #           template:
-  #             metadata:
-  #               labels:
-  #                 app: rabbitmq-consumer
-  #             spec:
-  #               containers:
-  #               - name: rabbitmq-consumer
-  #                 image: jeffhollan/rabbitmq-client:dev
-  #                 imagePullPolicy: Always
-  #                 command:
-  #                   - receive
-  #                 args:
-  #                   - 'amqp://user:PASSWORD@rabbitmq.default.svc.cluster.local:5672'
-  #                 envFrom:
-  #                 - secretRef:
-  #                     name: rabbitmq-consumer
-  #               dnsPolicy: ClusterFirst
-  #               nodeSelector:
-  #                 kubernetes.io/role: agent
-  #                 beta.kubernetes.io/os: linux
-  #                 type: virtual-kubelet
-  #               tolerations:
-  #               - key: virtual-kubelet.io/provider
-  #                 operator: Exists
-  #               - key: azure.com/aci
-  #                 effect: NoSchedule    
-  #         ---
-  #         apiVersion: keda.k8s.io/v1alpha1
-  #         kind: ScaledObject
-  #         metadata:
-  #           name: rabbitmq-consumer
-  #           annotations:
-  #             "helm.sh/hook": crd-install
-  #           namespace: default
-  #           labels:
-  #             deploymentName: rabbitmq-consumer
-  #         spec:
-  #           scaleTargetRef:
-  #             deploymentName: rabbitmq-consumer
-  #           pollingInterval: 5   # Optional. Default: 30 seconds
-  #           cooldownPeriod: 30   # Optional. Default: 300 seconds
-  #           maxReplicaCount: 30  # Optional. Default: 100
-  #           triggers:
-  #           - type: rabbitmq
-  #             metadata:
-  #               queueName: hello
-  #               host: RabbitMqHost
-  #               queueLength  : '5'
-  #         EOF
-
-  #     - name: "Notes"
-  #       run: |
-  #         INGRESS=$(kubectl get svc -n ingress -o json | jq -r ".items[0].spec.clusterIP")
-
-  #         echo "*************** Connection Information ***************"
-  #         echo "The NGNIX Ingress Controller Public IP address is:"
-  #         echo "http://{$INGRESS}"
-  #         echo ""
-  #         echo "Run the following to connect to the AKS cluster:"
-  #         echo "az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin"
-  #         echo "******************************************************"
-  #     # - name: "Create k8s service account"
-  #     #   env:
-  #     #     nameSpace: twt
-  #     #   run: |
-  #     #     cat <<EOF | kubectl apply -f -
-  #     #     apiVersion: v1
-  #     #     kind: ServiceAccount
-  #     #     imagePullSecrets:
-  #     #     - name: acr-auth
-  #     #     metadata:
-  #     #       name: ttsa
-  #     #       namespace: $nameSpace
-  #     #     EOF
-  buildImages:
+  deployInfra:
     runs-on: self-hosted
-    # needs: deployInfra
-    env:
-      artDockerURL: jfrogjd-docker.jfrog.io
-      ART_URL: https://jfrogjd.jfrog.io/jfrogjd/
-      ART_USER: admin
-      SERVER_ID: jfrog-jd
-      SLACK_CHANNEL: chattybot
     steps:
       # checkout branch
       - name: git checkout branch
@@ -325,6 +27,297 @@ jobs:
           ref: applitools
           clean: 'true'
 
+      # log into Azure
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # create resource group
+      - name: "Create Resource Group"
+        run: |
+          az group create --subscription "$subName" --name $resourceGroup --location $location --tags Tracking=$SESSION_TRACKING CreatedBy=$USER_ID
+
+      # create VNet
+      - name: "Create Virtual Network"
+        run: |
+          # run check for idempotent pipeline
+          vnetCheck=$(az network vnet list -g $resourceGroup -o tsv --query [0].name)
+          if [[  $vnetCheck == *$vnetName*  ]]; then
+            echo 'Virtual Network already exists'
+          else
+            echo 'Virtual network does not exist. Creating virtual network now.'
+            # create vnet
+            az network vnet create --resource-group $resourceGroup --name $vnetName --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name $subnetName --subnet-prefix 10.240.0.0/16
+          fi
+
+      # create virtual node subnet
+      - name: "Create Virtual Node Subnet"
+        run: |
+          # run check for idempotent pipeline
+          vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name $vnetName -o tsv --query '[1].name')
+
+          if [[  $vnetSubnetCheck == *$vnodeSubnetName* ]]; then
+            echo 'Virtual node subnet already exists'
+          else
+            echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
+            # configure vnet subnet
+            az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnetName --address-prefix 10.241.0.0/16
+          fi
+
+      #  Deploy backend infrastructure
+      - name: "Setup Backend Infra"
+        env:
+          azureClientID: 47e460d8-c66e-4489-85dd-ee2b522aaea5
+        run: |
+          vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name $subnetName --query id -o tsv)
+
+          az group deployment create -g $resourceGroup --template-file $Infrastructure \
+            --parameters servicePrincipalId=$azureClientID servicePrincipalSecret=${{ secrets.CLIENT_SECRET }} \
+            aksVersion=1.14.8 vnetSubnetID=$vnetID
+
+          echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
+
+          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
+
+          az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin --overwrite-existing
+
+      # Setup virutal node
+      - name: "Install Virtual Node on K8s cluster"
+        run: |
+          vNodeEnabledCheck=$(az aks show --resource-group $resourceGroup --name $AKS_CLUSTER --query addonProfiles.aciConnectorLinux.enabled -o tsv)
+          if [[ $vNodeEnabledCheck == *true*  ]]; then
+            echo "AKS Virtual Node add-on already enabled."
+          else
+            # Deploy virtual node
+            az aks enable-addons \
+            --resource-group $resourceGroup  \
+            --name $AKS_CLUSTER \
+            --addons virtual-node \
+            --subnet-name $vnodeSubnetName
+          fi
+
+      # Ngnix for production
+      - name: "Configure Ngnix for production"
+        env:
+          nameSpace: ingress
+        run: |
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $nameSpace
+          EOF
+
+          helm repo add stable http://storage.googleapis.com/kubernetes-charts
+
+          helm repo update
+
+          helm upgrade --install nginx-ingress stable/nginx-ingress \
+          --namespace $nameSpace \
+          --set controller.replicaCount=2 \
+          --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
+          --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
+
+      - name: "Create cert manager namespace"
+        env:
+          nameSpace: cert-manager
+        run: |
+          # cert manager namespace
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $nameSpace
+          EOF
+
+      - name: "Jetstack Cert Manager Config"
+        run: |
+          kubectl apply --validate=false \
+          -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.13/deploy/manifests/00-crds.yaml
+
+          helm repo add jetstack https://charts.jetstack.io
+
+          helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
+
+          kubectl apply -f IaC/cluster-issuer.yaml
+
+      - name: "Create jfrog-dev namespace/secret"
+        env:
+          secretName: jdk8s
+          nameSpace: jfrog
+        run: |
+          # jfrog dev namespace
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $nameSpace
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: $secretName
+            namespace: $nameSpace
+          type:  kubernetes.io/dockerconfigjson
+          data:
+            .dockerconfigjson: ${{ secrets.DOCKER_CFG }}
+          EOF
+
+      - name: "Create jfrog-prod namespace/secret"
+        env:
+          secretName: jdk8s
+          nameSpace: jfrog-prod
+        run: |
+          # jfrog prod namespace
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $nameSpace
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: $secretName
+            namespace: $nameSpace
+          type:  kubernetes.io/dockerconfigjson
+          data:
+            .dockerconfigjson: ${{ secrets.DOCKER_CFG }}
+          EOF
+
+      - name: "Create keda namespace"
+        env:
+          nameSpace: keda
+        run: |
+          # keda namespace
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $nameSpace
+          EOF
+
+      - name: "Setup scaling backend components"
+        run: |
+          # add kedacore repo
+          helm repo add kedacore https://kedacore.github.io/charts
+
+          # add stable repo for helm 3
+          helm repo add stable http://storage.googleapis.com/kubernetes-charts
+
+          # repo update
+          helm repo update
+
+          # keda install
+          helm upgrade --install keda kedacore/keda --namespace keda
+
+          # rabbitmq install
+          helm upgrade --install rabbitmq --set rabbitmq.username=user,rabbitmq.password=PASSWORD stable/rabbitmq
+
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: rabbitmq-consumer
+          data:
+            RabbitMqHost: YW1xcDovL3VzZXI6UEFTU1dPUkRAcmFiYml0bXEuZGVmYXVsdC5zdmMuY2x1c3Rlci5sb2NhbDo1Njcy
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: rabbitmq-consumer
+            namespace: default
+            labels:
+              app: rabbitmq-consumer
+          spec:
+            selector:
+              matchLabels:
+                app: rabbitmq-consumer
+            template:
+              metadata:
+                labels:
+                  app: rabbitmq-consumer
+              spec:
+                containers:
+                - name: rabbitmq-consumer
+                  image: jeffhollan/rabbitmq-client:dev
+                  imagePullPolicy: Always
+                  command:
+                    - receive
+                  args:
+                    - 'amqp://user:PASSWORD@rabbitmq.default.svc.cluster.local:5672'
+                  envFrom:
+                  - secretRef:
+                      name: rabbitmq-consumer
+                dnsPolicy: ClusterFirst
+                nodeSelector:
+                  kubernetes.io/role: agent
+                  beta.kubernetes.io/os: linux
+                  type: virtual-kubelet
+                tolerations:
+                - key: virtual-kubelet.io/provider
+                  operator: Exists
+                - key: azure.com/aci
+                  effect: NoSchedule    
+          ---
+          apiVersion: keda.k8s.io/v1alpha1
+          kind: ScaledObject
+          metadata:
+            name: rabbitmq-consumer
+            annotations:
+              "helm.sh/hook": crd-install
+            namespace: default
+            labels:
+              deploymentName: rabbitmq-consumer
+          spec:
+            scaleTargetRef:
+              deploymentName: rabbitmq-consumer
+            pollingInterval: 5   # Optional. Default: 30 seconds
+            cooldownPeriod: 30   # Optional. Default: 300 seconds
+            maxReplicaCount: 30  # Optional. Default: 100
+            triggers:
+            - type: rabbitmq
+              metadata:
+                queueName: hello
+                host: RabbitMqHost
+                queueLength  : '5'
+          EOF
+
+      - name: "Notes"
+        run: |
+          INGRESS=$(kubectl get svc -n ingress -o json | jq -r ".items[0].spec.clusterIP")
+
+          echo "*************** Connection Information ***************"
+          echo "The NGNIX Ingress Controller Public IP address is:"
+          echo "http://{$INGRESS}"
+          echo ""
+          echo "Run the following to connect to the AKS cluster:"
+          echo "az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin"
+          echo "******************************************************"
+      # - name: "Create k8s service account"
+      #   env:
+      #     nameSpace: twt
+      #   run: |
+      #     cat <<EOF | kubectl apply -f -
+      #     apiVersion: v1
+      #     kind: ServiceAccount
+      #     imagePullSecrets:
+      #     - name: acr-auth
+      #     metadata:
+      #       name: ttsa
+      #       namespace: $nameSpace
+      #     EOF
+  buildImages:
+    runs-on: self-hosted
+    needs: deployInfra
+    env:
+      artDockerURL: jfrogjd-docker.jfrog.io
+      ART_URL: https://jfrogjd.jfrog.io/jfrogjd/
+      ART_USER: admin
+      SERVER_ID: jfrog-jd
+      SLACK_CHANNEL: chattybot
+    steps:
       - name: "jfrog install, configure cli"
         run: |
           # Get Jfrog CLI
@@ -454,29 +447,28 @@ jobs:
         run: |
           # set batch ID
           APPLITOOLS_BATCH_ID=${{ github.run_id }}
-          echo "::set-env name=APPLITOOLS_BATCH_ID::${{ github.run_id }}"
+          echo "::set-env name=APPLITOOLS_BATCH_ID::$APPLITOOLS_BATCH_ID"
           echo "Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID"
 
           # set batch name
           APPLITOOLS_BATCH_NAME="GitHub Actions / ${{ github.workflow }}"
-          echo "::set-env name=APPLITOOLS_BATCH_NAME::GitHub Actions / ${{ github.workflow }}"
+          echo "::set-env name=APPLITOOLS_BATCH_NAME::$APPLITOOLS_BATCH_NAME"
           echo "Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME"
 
           # set server url
           APPLITOOLS_SERVER_URL="https://eyes.applitools.com"
-          echo "::set-env name=APPLITOOLS_SERVER_URL::https://eyes.applitools.com"
+          echo "::set-env name=APPLITOOLS_SERVER_URL::$APPLITOOLS_SERVER_URL"
           echo "Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL"
 
           # set batch sequence
           APPLITOOLS_BATCH_SEQUENCE="GitHub Actions / ${{ github.workflow }}"
-          echo "::set-env name=APPLITOOLS_BATCH_SEQUENCE::GitHub Actions / ${{ github.workflow }}"
+          echo "::set-env name=APPLITOOLS_BATCH_SEQUENCE::$APPLITOOLS_BATCH_SEQUENCE"
           echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
 
-          TEST_START_PAGE_test=https://$hostname
-
-          echo "::set-env name=TEST_START_PAGE_TEST::$TEST_START_PAGE_test"
-
-          echo "Setting environment variable TEST_START_PAGE_TEST: $TEST_START_PAGE_test"
+          # set test start page
+          TEST_START_PAGE=https://$hostname
+          echo "::set-env name=TEST_START_PAGE::$TEST_START_PAGE"
+          echo "Setting environment variable TEST_START_PAGE_TEST: $TEST_START_PAGE"
       
       - uses: actions/setup-java@v1
         with:
