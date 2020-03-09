@@ -1,515 +1,515 @@
-on: [push]
+# on: [push]
 
-name: jdk8s-full-cicd
+# name: jdk8s-full-cicd
 
-env:
-  resourceGroup: jdk8s
-  location: eastus
-  SESSION_TRACKING: jdk8s
-  USER_ID: jessde
-  subName: "ca-jessde-demo-test"
-  aksName: jdk8s
-  vnetName: jdk8sVnet
-  subnetName: jdk8sSubnet
-  vnodeSubnetName: VNSubnet
+# env:
+#   resourceGroup: jdk8s
+#   location: eastus
+#   SESSION_TRACKING: jdk8s
+#   USER_ID: jessde
+#   subName: "ca-jessde-demo-test"
+#   aksName: jdk8s
+#   vnetName: jdk8sVnet
+#   subnetName: jdk8sSubnet
+#   vnodeSubnetName: VNSubnet
 
-  # Deployment Paths
-  Infrastructure: IaC/deployment.json
+#   # Deployment Paths
+#   Infrastructure: IaC/deployment.json
 
-jobs:
-  # deployInfra:
-  #   runs-on: self-hosted
-  #   steps:
-  #     # checkout branch
-  #     - name: git checkout master branch
-  #       uses: actions/checkout@master
+# jobs:
+#   # deployInfra:
+#   #   runs-on: self-hosted
+#   #   steps:
+#   #     # checkout branch
+#   #     - name: git checkout master branch
+#   #       uses: actions/checkout@master
 
-  #     # log into Azure
-  #     - name: "Login via Azure CLI"
-  #       uses: azure/login@v1
-  #       with:
-  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+#   #     # log into Azure
+#   #     - name: "Login via Azure CLI"
+#   #       uses: azure/login@v1
+#   #       with:
+#   #         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-  #     # create resource group
-  #     - name: "Create Resource Group"
-  #       run: |
-  #         az group create --subscription "$subName" --name $resourceGroup --location $location --tags Tracking=$SESSION_TRACKING CreatedBy=$USER_ID
+#   #     # create resource group
+#   #     - name: "Create Resource Group"
+#   #       run: |
+#   #         az group create --subscription "$subName" --name $resourceGroup --location $location --tags Tracking=$SESSION_TRACKING CreatedBy=$USER_ID
 
-  #     # create VNet
-  #     - name: "Create Virtual Network"
-  #       run: |
-  #         # run check for idempotent pipeline
-  #         vnetCheck=$(az network vnet list -g $resourceGroup -o tsv --query [0].name)
-  #         if [[  $vnetCheck == *$vnetName*  ]]; then
-  #           echo 'Virtual Network already exists'
-  #         else
-  #           echo 'Virtual network does not exist. Creating virtual network now.'
-  #           # create vnet
-  #           az network vnet create --resource-group $resourceGroup --name $vnetName --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name $subnetName --subnet-prefix 10.240.0.0/16
-  #         fi
+#   #     # create VNet
+#   #     - name: "Create Virtual Network"
+#   #       run: |
+#   #         # run check for idempotent pipeline
+#   #         vnetCheck=$(az network vnet list -g $resourceGroup -o tsv --query [0].name)
+#   #         if [[  $vnetCheck == *$vnetName*  ]]; then
+#   #           echo 'Virtual Network already exists'
+#   #         else
+#   #           echo 'Virtual network does not exist. Creating virtual network now.'
+#   #           # create vnet
+#   #           az network vnet create --resource-group $resourceGroup --name $vnetName --subscription "$subName" --address-prefixes 10.0.0.0/8 --subnet-name $subnetName --subnet-prefix 10.240.0.0/16
+#   #         fi
 
-  #     # create virtual node subnet
-  #     - name: "Create Virtual Node Subnet"
-  #       run: |
-  #         # run check for idempotent pipeline
-  #         vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name $vnetName -o tsv --query '[1].name')
+#   #     # create virtual node subnet
+#   #     - name: "Create Virtual Node Subnet"
+#   #       run: |
+#   #         # run check for idempotent pipeline
+#   #         vnetSubnetCheck=$(az network vnet subnet list -g $resourceGroup --vnet-name $vnetName -o tsv --query '[1].name')
 
-  #         if [[  $vnetSubnetCheck == *$vnodeSubnetName* ]]; then
-  #           echo 'Virtual node subnet already exists'
-  #         else
-  #           echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
-  #           # configure vnet subnet
-  #           az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnetName --address-prefix 10.241.0.0/16
-  #         fi
+#   #         if [[  $vnetSubnetCheck == *$vnodeSubnetName* ]]; then
+#   #           echo 'Virtual node subnet already exists'
+#   #         else
+#   #           echo 'Virtual node subnet does not exist. Creating virtual subnet now.'
+#   #           # configure vnet subnet
+#   #           az network vnet subnet create --resource-group $resourceGroup --subscription "$subName" --vnet-name $vnetName --name $vnodeSubnetName --address-prefix 10.241.0.0/16
+#   #         fi
 
-  #     #  Deploy backend infrastructure
-  #     - name: "Setup Backend Infra"
-  #       env:
-  #         azureClientID: 47e460d8-c66e-4489-85dd-ee2b522aaea5
-  #       run: |
-  #         vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name $subnetName --query id -o tsv)
+#   #     #  Deploy backend infrastructure
+#   #     - name: "Setup Backend Infra"
+#   #       env:
+#   #         azureClientID: 47e460d8-c66e-4489-85dd-ee2b522aaea5
+#   #       run: |
+#   #         vnetID=$(az network vnet subnet show --resource-group $resourceGroup --vnet-name $vnetName --name $subnetName --query id -o tsv)
 
-  #         az group deployment create -g $resourceGroup --template-file $Infrastructure \
-  #           --parameters servicePrincipalId=$azureClientID servicePrincipalSecret=${{ secrets.CLIENT_SECRET }} \
-  #           aksVersion=1.14.8 vnetSubnetID=$vnetID
+#   #         az group deployment create -g $resourceGroup --template-file $Infrastructure \
+#   #           --parameters servicePrincipalId=$azureClientID servicePrincipalSecret=${{ secrets.CLIENT_SECRET }} \
+#   #           aksVersion=1.14.8 vnetSubnetID=$vnetID
 
-  #         echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
+#   #         echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
 
-  #         AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
+#   #         AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
 
-  #         az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin --overwrite-existing
+#   #         az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin --overwrite-existing
 
-  #     # Setup virutal node
-  #     - name: "Install Virtual Node on K8s cluster"
-  #       run: |
-  #         vNodeEnabledCheck=$(az aks show --resource-group $resourceGroup --name $AKS_CLUSTER --query addonProfiles.aciConnectorLinux.enabled -o tsv)
-  #         if [[ $vNodeEnabledCheck == *true*  ]]; then
-  #           echo "AKS Virtual Node add-on already enabled."
-  #         else
-  #           # Deploy virtual node
-  #           az aks enable-addons \
-  #           --resource-group $resourceGroup  \
-  #           --name $AKS_CLUSTER \
-  #           --addons virtual-node \
-  #           --subnet-name $vnodeSubnetName
-  #         fi
+#   #     # Setup virutal node
+#   #     - name: "Install Virtual Node on K8s cluster"
+#   #       run: |
+#   #         vNodeEnabledCheck=$(az aks show --resource-group $resourceGroup --name $AKS_CLUSTER --query addonProfiles.aciConnectorLinux.enabled -o tsv)
+#   #         if [[ $vNodeEnabledCheck == *true*  ]]; then
+#   #           echo "AKS Virtual Node add-on already enabled."
+#   #         else
+#   #           # Deploy virtual node
+#   #           az aks enable-addons \
+#   #           --resource-group $resourceGroup  \
+#   #           --name $AKS_CLUSTER \
+#   #           --addons virtual-node \
+#   #           --subnet-name $vnodeSubnetName
+#   #         fi
 
-  #     # Ngnix for production
-  #     - name: "Configure Ngnix for production"
-  #       env:
-  #         nameSpace: ingress
-  #       run: |
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         EOF
+#   #     # Ngnix for production
+#   #     - name: "Configure Ngnix for production"
+#   #       env:
+#   #         nameSpace: ingress
+#   #       run: |
+#   #         cat <<EOF | kubectl apply -f -
+#   #         apiVersion: v1
+#   #         kind: Namespace
+#   #         metadata:
+#   #           name: $nameSpace
+#   #         EOF
 
-  #         helm repo add stable http://storage.googleapis.com/kubernetes-charts
+#   #         helm repo add stable http://storage.googleapis.com/kubernetes-charts
 
-  #         helm repo update
+#   #         helm repo update
 
-  #         helm upgrade --install nginx-ingress stable/nginx-ingress \
-  #         --namespace $nameSpace \
-  #         --set controller.replicaCount=2 \
-  #         --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
-  #         --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
+#   #         helm upgrade --install nginx-ingress stable/nginx-ingress \
+#   #         --namespace $nameSpace \
+#   #         --set controller.replicaCount=2 \
+#   #         --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
+#   #         --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
 
-  #     - name: "Create cert manager namespace"
-  #       env:
-  #         nameSpace: cert-manager
-  #       run: |
-  #         # cert manager namespace
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         EOF
+#   #     - name: "Create cert manager namespace"
+#   #       env:
+#   #         nameSpace: cert-manager
+#   #       run: |
+#   #         # cert manager namespace
+#   #         cat <<EOF | kubectl apply -f -
+#   #         apiVersion: v1
+#   #         kind: Namespace
+#   #         metadata:
+#   #           name: $nameSpace
+#   #         EOF
 
-  #     - name: "Jetstack Cert Manager Config"
-  #       run: |
-  #         kubectl apply --validate=false \
-  #         -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.13/deploy/manifests/00-crds.yaml
+#   #     - name: "Jetstack Cert Manager Config"
+#   #       run: |
+#   #         kubectl apply --validate=false \
+#   #         -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.13/deploy/manifests/00-crds.yaml
 
-  #         helm repo add jetstack https://charts.jetstack.io
+#   #         helm repo add jetstack https://charts.jetstack.io
 
-  #         helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
+#   #         helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
 
-  #         kubectl apply -f IaC/cluster-issuer.yaml
+#   #         kubectl apply -f IaC/cluster-issuer.yaml
 
-  #     - name: "Create jfrog-dev namespace/secret"
-  #       env:
-  #         secretName: jdk8s
-  #         nameSpace: jfrog
-  #       run: |
-  #         # jfrog dev namespace
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         ---
-  #         apiVersion: v1
-  #         kind: Secret
-  #         metadata:
-  #           name: $secretName
-  #           namespace: $nameSpace
-  #         type:  kubernetes.io/dockerconfigjson
-  #         data:
-  #           .dockerconfigjson: ${{ secrets.DOCKER_CFG }}
-  #         EOF
+#   #     - name: "Create jfrog-dev namespace/secret"
+#   #       env:
+#   #         secretName: jdk8s
+#   #         nameSpace: jfrog
+#   #       run: |
+#   #         # jfrog dev namespace
+#   #         cat <<EOF | kubectl apply -f -
+#   #         apiVersion: v1
+#   #         kind: Namespace
+#   #         metadata:
+#   #           name: $nameSpace
+#   #         ---
+#   #         apiVersion: v1
+#   #         kind: Secret
+#   #         metadata:
+#   #           name: $secretName
+#   #           namespace: $nameSpace
+#   #         type:  kubernetes.io/dockerconfigjson
+#   #         data:
+#   #           .dockerconfigjson: ${{ secrets.DOCKER_CFG }}
+#   #         EOF
 
-  #     - name: "Create jfrog-prod namespace/secret"
-  #       env:
-  #         secretName: jdk8s
-  #         nameSpace: jfrog-prod
-  #       run: |
-  #         # jfrog prod namespace
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         ---
-  #         apiVersion: v1
-  #         kind: Secret
-  #         metadata:
-  #           name: $secretName
-  #           namespace: $nameSpace
-  #         type:  kubernetes.io/dockerconfigjson
-  #         data:
-  #           .dockerconfigjson: ${{ secrets.DOCKER_CFG }}
-  #         EOF
+#   #     - name: "Create jfrog-prod namespace/secret"
+#   #       env:
+#   #         secretName: jdk8s
+#   #         nameSpace: jfrog-prod
+#   #       run: |
+#   #         # jfrog prod namespace
+#   #         cat <<EOF | kubectl apply -f -
+#   #         apiVersion: v1
+#   #         kind: Namespace
+#   #         metadata:
+#   #           name: $nameSpace
+#   #         ---
+#   #         apiVersion: v1
+#   #         kind: Secret
+#   #         metadata:
+#   #           name: $secretName
+#   #           namespace: $nameSpace
+#   #         type:  kubernetes.io/dockerconfigjson
+#   #         data:
+#   #           .dockerconfigjson: ${{ secrets.DOCKER_CFG }}
+#   #         EOF
 
-  #     - name: "Create keda namespace"
-  #       env:
-  #         nameSpace: keda
-  #       run: |
-  #         # keda namespace
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Namespace
-  #         metadata:
-  #           name: $nameSpace
-  #         EOF
+#   #     - name: "Create keda namespace"
+#   #       env:
+#   #         nameSpace: keda
+#   #       run: |
+#   #         # keda namespace
+#   #         cat <<EOF | kubectl apply -f -
+#   #         apiVersion: v1
+#   #         kind: Namespace
+#   #         metadata:
+#   #           name: $nameSpace
+#   #         EOF
 
-  #     - name: "Setup scaling backend components"
-  #       run: |
-  #         # add kedacore repo
-  #         helm repo add kedacore https://kedacore.github.io/charts
+#   #     - name: "Setup scaling backend components"
+#   #       run: |
+#   #         # add kedacore repo
+#   #         helm repo add kedacore https://kedacore.github.io/charts
 
-  #         # add stable repo for helm 3
-  #         helm repo add stable http://storage.googleapis.com/kubernetes-charts
+#   #         # add stable repo for helm 3
+#   #         helm repo add stable http://storage.googleapis.com/kubernetes-charts
 
-  #         # repo update
-  #         helm repo update
+#   #         # repo update
+#   #         helm repo update
 
-  #         # keda install
-  #         helm upgrade --install keda kedacore/keda --namespace keda
+#   #         # keda install
+#   #         helm upgrade --install keda kedacore/keda --namespace keda
 
-  #         # rabbitmq install
-  #         helm upgrade --install rabbitmq --set rabbitmq.username=user,rabbitmq.password=PASSWORD stable/rabbitmq
+#   #         # rabbitmq install
+#   #         helm upgrade --install rabbitmq --set rabbitmq.username=user,rabbitmq.password=PASSWORD stable/rabbitmq
 
-  #         cat <<EOF | kubectl apply -f -
-  #         apiVersion: v1
-  #         kind: Secret
-  #         metadata:
-  #           name: rabbitmq-consumer
-  #         data:
-  #           RabbitMqHost: YW1xcDovL3VzZXI6UEFTU1dPUkRAcmFiYml0bXEuZGVmYXVsdC5zdmMuY2x1c3Rlci5sb2NhbDo1Njcy
-  #         ---
-  #         apiVersion: apps/v1
-  #         kind: Deployment
-  #         metadata:
-  #           name: rabbitmq-consumer
-  #           namespace: default
-  #           labels:
-  #             app: rabbitmq-consumer
-  #         spec:
-  #           selector:
-  #             matchLabels:
-  #               app: rabbitmq-consumer
-  #           template:
-  #             metadata:
-  #               labels:
-  #                 app: rabbitmq-consumer
-  #             spec:
-  #               containers:
-  #               - name: rabbitmq-consumer
-  #                 image: jeffhollan/rabbitmq-client:dev
-  #                 imagePullPolicy: Always
-  #                 command:
-  #                   - receive
-  #                 args:
-  #                   - 'amqp://user:PASSWORD@rabbitmq.default.svc.cluster.local:5672'
-  #                 envFrom:
-  #                 - secretRef:
-  #                     name: rabbitmq-consumer
-  #               dnsPolicy: ClusterFirst
-  #               nodeSelector:
-  #                 kubernetes.io/role: agent
-  #                 beta.kubernetes.io/os: linux
-  #                 type: virtual-kubelet
-  #               tolerations:
-  #               - key: virtual-kubelet.io/provider
-  #                 operator: Exists
-  #               - key: azure.com/aci
-  #                 effect: NoSchedule    
-  #         ---
-  #         apiVersion: keda.k8s.io/v1alpha1
-  #         kind: ScaledObject
-  #         metadata:
-  #           name: rabbitmq-consumer
-  #           annotations:
-  #             "helm.sh/hook": crd-install
-  #           namespace: default
-  #           labels:
-  #             deploymentName: rabbitmq-consumer
-  #         spec:
-  #           scaleTargetRef:
-  #             deploymentName: rabbitmq-consumer
-  #           pollingInterval: 5   # Optional. Default: 30 seconds
-  #           cooldownPeriod: 30   # Optional. Default: 300 seconds
-  #           maxReplicaCount: 30  # Optional. Default: 100
-  #           triggers:
-  #           - type: rabbitmq
-  #             metadata:
-  #               queueName: hello
-  #               host: RabbitMqHost
-  #               queueLength  : '5'
-  #         EOF
+#   #         cat <<EOF | kubectl apply -f -
+#   #         apiVersion: v1
+#   #         kind: Secret
+#   #         metadata:
+#   #           name: rabbitmq-consumer
+#   #         data:
+#   #           RabbitMqHost: YW1xcDovL3VzZXI6UEFTU1dPUkRAcmFiYml0bXEuZGVmYXVsdC5zdmMuY2x1c3Rlci5sb2NhbDo1Njcy
+#   #         ---
+#   #         apiVersion: apps/v1
+#   #         kind: Deployment
+#   #         metadata:
+#   #           name: rabbitmq-consumer
+#   #           namespace: default
+#   #           labels:
+#   #             app: rabbitmq-consumer
+#   #         spec:
+#   #           selector:
+#   #             matchLabels:
+#   #               app: rabbitmq-consumer
+#   #           template:
+#   #             metadata:
+#   #               labels:
+#   #                 app: rabbitmq-consumer
+#   #             spec:
+#   #               containers:
+#   #               - name: rabbitmq-consumer
+#   #                 image: jeffhollan/rabbitmq-client:dev
+#   #                 imagePullPolicy: Always
+#   #                 command:
+#   #                   - receive
+#   #                 args:
+#   #                   - 'amqp://user:PASSWORD@rabbitmq.default.svc.cluster.local:5672'
+#   #                 envFrom:
+#   #                 - secretRef:
+#   #                     name: rabbitmq-consumer
+#   #               dnsPolicy: ClusterFirst
+#   #               nodeSelector:
+#   #                 kubernetes.io/role: agent
+#   #                 beta.kubernetes.io/os: linux
+#   #                 type: virtual-kubelet
+#   #               tolerations:
+#   #               - key: virtual-kubelet.io/provider
+#   #                 operator: Exists
+#   #               - key: azure.com/aci
+#   #                 effect: NoSchedule    
+#   #         ---
+#   #         apiVersion: keda.k8s.io/v1alpha1
+#   #         kind: ScaledObject
+#   #         metadata:
+#   #           name: rabbitmq-consumer
+#   #           annotations:
+#   #             "helm.sh/hook": crd-install
+#   #           namespace: default
+#   #           labels:
+#   #             deploymentName: rabbitmq-consumer
+#   #         spec:
+#   #           scaleTargetRef:
+#   #             deploymentName: rabbitmq-consumer
+#   #           pollingInterval: 5   # Optional. Default: 30 seconds
+#   #           cooldownPeriod: 30   # Optional. Default: 300 seconds
+#   #           maxReplicaCount: 30  # Optional. Default: 100
+#   #           triggers:
+#   #           - type: rabbitmq
+#   #             metadata:
+#   #               queueName: hello
+#   #               host: RabbitMqHost
+#   #               queueLength  : '5'
+#   #         EOF
 
-  #     - name: "Notes"
-  #       run: |
-  #         INGRESS=$(kubectl get svc -n ingress -o json | jq -r ".items[0].spec.clusterIP")
+#   #     - name: "Notes"
+#   #       run: |
+#   #         INGRESS=$(kubectl get svc -n ingress -o json | jq -r ".items[0].spec.clusterIP")
 
-  #         echo "*************** Connection Information ***************"
-  #         echo "The NGNIX Ingress Controller Public IP address is:"
-  #         echo "http://{$INGRESS}"
-  #         echo ""
-  #         echo "Run the following to connect to the AKS cluster:"
-  #         echo "az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin"
-  #         echo "******************************************************"
-  #     # - name: "Create k8s service account"
-  #     #   env:
-  #     #     nameSpace: twt
-  #     #   run: |
-  #     #     cat <<EOF | kubectl apply -f -
-  #     #     apiVersion: v1
-  #     #     kind: ServiceAccount
-  #     #     imagePullSecrets:
-  #     #     - name: acr-auth
-  #     #     metadata:
-  #     #       name: ttsa
-  #     #       namespace: $nameSpace
-  #     #     EOF
-  buildImages:
-    runs-on: self-hosted
-    # needs: deployInfra
-    env:
-      artDockerURL: jfrogjd-docker.jfrog.io
-      ART_URL: https://jfrogjd.jfrog.io/jfrogjd/
-      ART_USER: admin
-      SERVER_ID: jfrog-jd
-      SLACK_CHANNEL: chattybot
-    steps:
-    #checkout branch
-      - name: git checkout branch
-        uses: actions/checkout@v2
-        with:
-          ref: applitools
+#   #         echo "*************** Connection Information ***************"
+#   #         echo "The NGNIX Ingress Controller Public IP address is:"
+#   #         echo "http://{$INGRESS}"
+#   #         echo ""
+#   #         echo "Run the following to connect to the AKS cluster:"
+#   #         echo "az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin"
+#   #         echo "******************************************************"
+#   #     # - name: "Create k8s service account"
+#   #     #   env:
+#   #     #     nameSpace: twt
+#   #     #   run: |
+#   #     #     cat <<EOF | kubectl apply -f -
+#   #     #     apiVersion: v1
+#   #     #     kind: ServiceAccount
+#   #     #     imagePullSecrets:
+#   #     #     - name: acr-auth
+#   #     #     metadata:
+#   #     #       name: ttsa
+#   #     #       namespace: $nameSpace
+#   #     #     EOF
+#   buildImages:
+#     runs-on: self-hosted
+#     # needs: deployInfra
+#     env:
+#       artDockerURL: jfrogjd-docker.jfrog.io
+#       ART_URL: https://jfrogjd.jfrog.io/jfrogjd/
+#       ART_USER: admin
+#       SERVER_ID: jfrog-jd
+#       SLACK_CHANNEL: chattybot
+#     steps:
+#     #checkout branch
+#       - name: git checkout branch
+#         uses: actions/checkout@v2
+#         with:
+#           ref: applitools
 
-      - name: "jfrog install, configure cli"
-        run: |
-          # Get Jfrog CLI
-          if [ -e jfrog ]; then
-              echo "Jfrog binary already exists. Logging into Artifactory now.."
-          else
-              echo "Jfrog binary does not exist. Downloading now...."
-              curl -fL https://getcli.jfrog.io | sh
-              sudo mv jfrog /usr/local/bin
-          fi
+#       - name: "jfrog install, configure cli"
+#         run: |
+#           # Get Jfrog CLI
+#           if [ -e jfrog ]; then
+#               echo "Jfrog binary already exists. Logging into Artifactory now.."
+#           else
+#               echo "Jfrog binary does not exist. Downloading now...."
+#               curl -fL https://getcli.jfrog.io | sh
+#               sudo mv jfrog /usr/local/bin
+#           fi
 
-          # Configure Jfrog CLI
-          jfrog rt config $SERVER_ID --url=$ART_URL --user=$ART_USER --password=${{ secrets.ART_PASS }} --interactive=false
+#           # Configure Jfrog CLI
+#           jfrog rt config $SERVER_ID --url=$ART_URL --user=$ART_USER --password=${{ secrets.ART_PASS }} --interactive=false
 
-      - name: "jfrog maven build"
-        run: |
-          # --- jfrog Maven Build
-          export M2_HOME=/usr/share/maven
-          jfrog rt mvn "clean install -U -Dproject.version=$GITHUB_RUN_ID -Dartifactory.publish.buildInfo=true" --build-name=$GITHUB_REPOSITORY-2020 --build-number=$GITHUB_RUN_ID
+#       - name: "jfrog maven build"
+#         run: |
+#           # --- jfrog Maven Build
+#           export M2_HOME=/usr/share/maven
+#           jfrog rt mvn "clean install -U -Dproject.version=$GITHUB_RUN_ID -Dartifactory.publish.buildInfo=true" --build-name=$GITHUB_REPOSITORY-2020 --build-number=$GITHUB_RUN_ID
 
-      # docker login
-      - name: "docker login"
-        uses: azure/docker-login@v1
-        with:
-          login-server: $artDockerURL
-          username: $ART_USER
-          password: ${{ secrets.ART_PASS }}
+#       # docker login
+#       - name: "docker login"
+#         uses: azure/docker-login@v1
+#         with:
+#           login-server: $artDockerURL
+#           username: $ART_USER
+#           password: ${{ secrets.ART_PASS }}
 
-      # build/push
-      - name: "build/push chattybot"
-        run: |
-          echo ${{ secrets.ART_PASS }} | docker login $artDockerURL -u $ART_USER --password-stdin && echo "jfrog docker login successful"
+#       # build/push
+#       - name: "build/push chattybot"
+#         run: |
+#           echo ${{ secrets.ART_PASS }} | docker login $artDockerURL -u $ART_USER --password-stdin && echo "jfrog docker login successful"
 
-          docker build -f Dockerfile . -t $artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}
+#           docker build -f Dockerfile . -t $artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}
 
-          docker push $artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}
+#           docker push $artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}
 
-      # helm lint
-      - name: "helm lint"
-        run: |
-          helm lint charts/spring-boot-websocket-chat-demo
+#       # helm lint
+#       - name: "helm lint"
+#         run: |
+#           helm lint charts/spring-boot-websocket-chat-demo
 
-      - name: "helm package"
-        run: |
-          helm package charts/spring-boot-websocket-chat-demo
+#       - name: "helm package"
+#         run: |
+#           helm package charts/spring-boot-websocket-chat-demo
 
-      - name: "publish build info to artifactory"
-        run: |
-          # --- Jfrog Docker Push
-          jfrog rt docker-push --server-id=$SERVER_ID --build-name=$GITHUB_REPOSITORY-2020 --build-number=$GITHUB_RUN_ID "$artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}" docker-dev
+#       - name: "publish build info to artifactory"
+#         run: |
+#           # --- Jfrog Docker Push
+#           jfrog rt docker-push --server-id=$SERVER_ID --build-name=$GITHUB_REPOSITORY-2020 --build-number=$GITHUB_RUN_ID "$artDockerURL/$GITHUB_REPOSITORY:${{ github.sha }}" docker-dev
 
-          # --- Upload Helm Chart Artifact to Artifactory
-          jfrog rt upload --server-id=$SERVER_ID --build-name=$GITHUB_REPOSITORY-2020 --build-number=$GITHUB_RUN_ID "$GITHUB_WORKSPACE/*.tgz" helm-repo
+#           # --- Upload Helm Chart Artifact to Artifactory
+#           jfrog rt upload --server-id=$SERVER_ID --build-name=$GITHUB_REPOSITORY-2020 --build-number=$GITHUB_RUN_ID "$GITHUB_WORKSPACE/*.tgz" helm-repo
 
-          # --- JFrog Collect Build Info to Artifactory
-          jfrog rt build-collect-env $GITHUB_REPOSITORY-2020 $GITHUB_RUN_ID
+#           # --- JFrog Collect Build Info to Artifactory
+#           jfrog rt build-collect-env $GITHUB_REPOSITORY-2020 $GITHUB_RUN_ID
 
-          # -- build publish
-          jfrog rt build-publish --build-url="https://github.com/$GITHUB_REPOSITORY/runs/$GITHUB_RUN_ID" --env-exclude="*key*;*pass*;" $GITHUB_REPOSITORY-2020 $GITHUB_RUN_ID |& tee publish.txt
+#           # -- build publish
+#           jfrog rt build-publish --build-url="https://github.com/$GITHUB_REPOSITORY/runs/$GITHUB_RUN_ID" --env-exclude="*key*;*pass*;" $GITHUB_REPOSITORY-2020 $GITHUB_RUN_ID |& tee publish.txt
 
-          # --- Xray Scan
-          jfrog rt build-scan --server-id=$SERVER_ID $GITHUB_REPOSITORY-2020 $GITHUB_RUN_ID | tee results.json
+#           # --- Xray Scan
+#           jfrog rt build-scan --server-id=$SERVER_ID $GITHUB_REPOSITORY-2020 $GITHUB_RUN_ID | tee results.json
 
-      - name: "slack build trigger"
-        run: |
-          ## Jfrog Build
-          JF_BUILD=$(sed -n "s/^.*http/http/p" publish.txt)
+#       - name: "slack build trigger"
+#         run: |
+#           ## Jfrog Build
+#           JF_BUILD=$(sed -n "s/^.*http/http/p" publish.txt)
 
-          curl -X POST --data-urlencode 'payload={"text":"Jfrog Artifactory GitHub Run '$GITHUB_RUN_ID' Information","attachments":[{"fallback":"JFrog Artifactory GitHub Run '$GITHUB_RUN_ID' Information","color":"#36a64f","author_link":"'$JF_BUILD'","title":"JFrog Build Artifacts","title_link":"'$JF_BUILD'","text":"Build Artifacts for GitHub Actions '$GITHUB_RUN_ID'","fields":[{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog Artifactory Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' ${{ secrets.SLACK_WEBHOOK_URL}} && echo "Slack Build Message Posted"
+#           curl -X POST --data-urlencode 'payload={"text":"Jfrog Artifactory GitHub Run '$GITHUB_RUN_ID' Information","attachments":[{"fallback":"JFrog Artifactory GitHub Run '$GITHUB_RUN_ID' Information","color":"#36a64f","author_link":"'$JF_BUILD'","title":"JFrog Build Artifacts","title_link":"'$JF_BUILD'","text":"Build Artifacts for GitHub Actions '$GITHUB_RUN_ID'","fields":[{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog Artifactory Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' ${{ secrets.SLACK_WEBHOOK_URL}} && echo "Slack Build Message Posted"
 
-      - name: "slack xray trigger"
-        run: |
-          ## Jfrog Xray Scan
+#       - name: "slack xray trigger"
+#         run: |
+#           ## Jfrog Xray Scan
 
-          JF_XRAY_ALERTS=$(jq ".summary.total_alerts" results.json)
-          JF_SCAN_FAIL=$(jq ".summary.fail_build" results.json)
-          JF_XRAY_RPT="https://jfrogjd-xray.jfrog.io/web/#/component/details/build:~2F~2Fjldeen~2Fspring-boot-websocket-chat-demo-2020/$GITHUB_RUN_ID"
+#           JF_XRAY_ALERTS=$(jq ".summary.total_alerts" results.json)
+#           JF_SCAN_FAIL=$(jq ".summary.fail_build" results.json)
+#           JF_XRAY_RPT="https://jfrogjd-xray.jfrog.io/web/#/component/details/build:~2F~2Fjldeen~2Fspring-boot-websocket-chat-demo-2020/$GITHUB_RUN_ID"
 
-          if [[ $JF_XRAY_ALERTS -eq 0 ]]; then
-            slackStyle=good && echo "No Xray Scan alerts found"
-          else
-            slackStyle=danger && echo "Xray scan alerts found"
-          fi
+#           if [[ $JF_XRAY_ALERTS -eq 0 ]]; then
+#             slackStyle=good && echo "No Xray Scan alerts found"
+#           else
+#             slackStyle=danger && echo "Xray scan alerts found"
+#           fi
 
-          curl -X POST --data-urlencode 'payload={"text":"JFrog XRay Scan Report for GitHub Run '$GITHUB_RUN_ID'","attachments":[{"fallback":"JFrog XRay Scan Report for GitHub Run '$GITHUB_RUN_ID'","color":"'$slackStyle'","author_link":"'$JF_XRAY_RPT'","title":"JFrog XRay Scan Report for GitHub Actions","title_link":"'$JF_XRAY_RPT'","text":"JFrog Xray Scan Report for GitHub Actions run '$GITHUB_RUN_ID'","fields":[{"title":"XRay Alerts","value":"'$JF_XRAY_ALERTS' alerts were generated","short":false},{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog XRay Scan Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' ${{ secrets.SLACK_WEBHOOK_URL}} > /dev/null 2>&1 && echo "Slack XRay Message Posted"
-          if [[ "'$JF_SCAN_FAIL'" = *true* ]]; then exit 1; else exit 0; fi
+#           curl -X POST --data-urlencode 'payload={"text":"JFrog XRay Scan Report for GitHub Run '$GITHUB_RUN_ID'","attachments":[{"fallback":"JFrog XRay Scan Report for GitHub Run '$GITHUB_RUN_ID'","color":"'$slackStyle'","author_link":"'$JF_XRAY_RPT'","title":"JFrog XRay Scan Report for GitHub Actions","title_link":"'$JF_XRAY_RPT'","text":"JFrog Xray Scan Report for GitHub Actions run '$GITHUB_RUN_ID'","fields":[{"title":"XRay Alerts","value":"'$JF_XRAY_ALERTS' alerts were generated","short":false},{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog XRay Scan Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' ${{ secrets.SLACK_WEBHOOK_URL}} > /dev/null 2>&1 && echo "Slack XRay Message Posted"
+#           if [[ "'$JF_SCAN_FAIL'" = *true* ]]; then exit 1; else exit 0; fi
 
-  deployMicroservicesDev:
-    runs-on: self-hosted
-    needs: buildImages
-    env:
-      nameSpace: jfrog
-      artDockerURL: jfrogjd-docker.jfrog.io
-      TEST_START_PAGE: ghchattybot-dev.k8s.az.jessicadeen.com
-    steps:
-      - name: "configure deployment environment"
-        run: |
-          # set for this step
-          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
+#   deployMicroservicesDev:
+#     runs-on: self-hosted
+#     needs: buildImages
+#     env:
+#       nameSpace: jfrog
+#       artDockerURL: jfrogjd-docker.jfrog.io
+#       TEST_START_PAGE: ghchattybot-dev.k8s.az.jessicadeen.com
+#     steps:
+#       - name: "configure deployment environment"
+#         run: |
+#           # set for this step
+#           AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
 
-          # persist env vars
-          echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
-          echo "::set-env name=INGRESS::$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)"
+#           # persist env vars
+#           echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
+#           echo "::set-env name=INGRESS::$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)"
 
-      - name: "helm install chattybot dev"
-        run: |
-          # spring deploy
-          helm upgrade --install chattybot-dev $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=$TEST_START_PAGE --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
-      # - name: Applitools Build Task
-      #   run: |
-      #     # set batch ID
-      #     APPLITOOLS_BATCH_ID=${{ github.run_id }}
+#       - name: "helm install chattybot dev"
+#         run: |
+#           # spring deploy
+#           helm upgrade --install chattybot-dev $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=$TEST_START_PAGE --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
+#       # - name: Applitools Build Task
+#       #   run: |
+#       #     # set batch ID
+#       #     APPLITOOLS_BATCH_ID=${{ github.run_id }}
 
-      #     echo "::set-env name=APPLITOOLS_BATCH_ID::${{ github.run_id }}"
+#       #     echo "::set-env name=APPLITOOLS_BATCH_ID::${{ github.run_id }}"
           
-      #     echo "Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID"
+#       #     echo "Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID"
 
-      #     # set batch name
-      #     APPLITOOLS_BATCH_NAME="GitHub Actions / ${{ github.workflow }}"
+#       #     # set batch name
+#       #     APPLITOOLS_BATCH_NAME="GitHub Actions / ${{ github.workflow }}"
 
-      #     echo "::set-env name=APPLITOOLS_BATCH_NAME::GitHub Actions / ${{ github.workflow }}"
+#       #     echo "::set-env name=APPLITOOLS_BATCH_NAME::GitHub Actions / ${{ github.workflow }}"
           
-      #     echo "Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME"
+#       #     echo "Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME"
 
-      #     # set server url
-      #     APPLITOOLS_SERVER_URL="https://eyes.applitools.com"
+#       #     # set server url
+#       #     APPLITOOLS_SERVER_URL="https://eyes.applitools.com"
 
-      #     echo "::set-env name=APPLITOOLS_SERVER_URL::https://eyes.applitools.com"
+#       #     echo "::set-env name=APPLITOOLS_SERVER_URL::https://eyes.applitools.com"
           
-      #     echo "Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL"
+#       #     echo "Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL"
 
-      #     # set batch sequence
-      #     APPLITOOLS_BATCH_SEQUENCE="GitHub Actions / ${{ github.workflow }}"
+#       #     # set batch sequence
+#       #     APPLITOOLS_BATCH_SEQUENCE="GitHub Actions / ${{ github.workflow }}"
 
-      #     echo "::set-env name=APPLITOOLS_BATCH_SEQUENCE::GitHub Actions / ${{ github.workflow }}"
+#       #     echo "::set-env name=APPLITOOLS_BATCH_SEQUENCE::GitHub Actions / ${{ github.workflow }}"
           
-      #     echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
+#       #     echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
       
-      # - name: "Setup JDK"
-      #   uses: actions/setup-java@v1
-      #   with:
-      #     java-version: '13'
+#       # - name: "Setup JDK"
+#       #   uses: actions/setup-java@v1
+#       #   with:
+#       #     java-version: '13'
 
-      - name: "Visual Testing"
-        env:
-          APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}    
-        run: mvn -version && export JAVA_HOME= && mvn -f visual_tests/pom.xml clean test test
+#       - name: "Visual Testing"
+#         env:
+#           APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}    
+#         run: mvn -version && export JAVA_HOME= && mvn -f visual_tests/pom.xml clean test test
 
-      - name: "Label all pods for network policy"
-        run: |
-          # add label
-          kubectl label -n $nameSpace pods --all role=spring-app-dev --overwrite=true
+#       - name: "Label all pods for network policy"
+#         run: |
+#           # add label
+#           kubectl label -n $nameSpace pods --all role=spring-app-dev --overwrite=true
 
-  deployMicroservicesProd:
-    runs-on: self-hosted
-    needs: buildImages
-    env:
-      nameSpace: jfrog-prod
-      artDockerURL: jfrogjd-docker.jfrog.io
-    steps:
-      - name: "configure deployment environment"
-        run: |
-          # set for this step
-          AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
-          # persist env vars
-          echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
-          echo "::set-env name=INGRESS::$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)"
+#   deployMicroservicesProd:
+#     runs-on: self-hosted
+#     needs: buildImages
+#     env:
+#       nameSpace: jfrog-prod
+#       artDockerURL: jfrogjd-docker.jfrog.io
+#     steps:
+#       - name: "configure deployment environment"
+#         run: |
+#           # set for this step
+#           AKS_CLUSTER=$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)
+#           # persist env vars
+#           echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
+#           echo "::set-env name=INGRESS::$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)"
 
-      - name: "helm install chattybot prod"
-        run: |
-          # spring deploy
-          helm upgrade --install chattybot $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=ghchattybot.k8s.az.jessicadeen.com --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set replicaCount=3 --set buildID=$GITHUB_RUN_ID
+#       - name: "helm install chattybot prod"
+#         run: |
+#           # spring deploy
+#           helm upgrade --install chattybot $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=ghchattybot.k8s.az.jessicadeen.com --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set replicaCount=3 --set buildID=$GITHUB_RUN_ID
 
-      - name: "Label all pods for network policy"
-        run: |
-          # add label
-          kubectl label -n $nameSpace pods --all role=spring-app-prod --overwrite=true
-  #
-  #     - name: "Notes"
-  #       run: |
-  #         INGRESS=$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)
-  #         echo "*************** Connection Information ***************"
-  #         echo "The Tailwind Traders Website can be accessed at:"
-  #         echo "http://{$INGRESS}"
-  #         echo ""
-  #         echo "Run the following to connect to the AKS cluster:"
-  #         echo "az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin"
-  #         echo "******************************************************"
-  #     # logout
-  #     - name: "Azure logout"
-  #       run: |
-  #         az logout
+#       - name: "Label all pods for network policy"
+#         run: |
+#           # add label
+#           kubectl label -n $nameSpace pods --all role=spring-app-prod --overwrite=true
+#   #
+#   #     - name: "Notes"
+#   #       run: |
+#   #         INGRESS=$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)
+#   #         echo "*************** Connection Information ***************"
+#   #         echo "The Tailwind Traders Website can be accessed at:"
+#   #         echo "http://{$INGRESS}"
+#   #         echo ""
+#   #         echo "Run the following to connect to the AKS cluster:"
+#   #         echo "az aks get-credentials --name $AKS_CLUSTER --resource-group $resourceGroup --admin"
+#   #         echo "******************************************************"
+#   #     # logout
+#   #     - name: "Azure logout"
+#   #       run: |
+#   #         az logout
