@@ -459,21 +459,15 @@ jobs:
           
       #     echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
       
-      - name: "Setup JDK"
-        uses: actions/setup-java@v1
-        with:
-          java-version: '13'
+      # - name: "Setup JDK"
+      #   uses: actions/setup-java@v1
+      #   with:
+      #     java-version: '13'
 
-      - name: "testing"
-        run: |
-          mvn -version 
-
-          which mvn
-          
       - name: "Visual Testing"
         env:
           APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}    
-        run: mvn -f visual_tests/pom.xml clean test test -X
+        run: mvn -f visual_tests/pom.xml clean test test
 
       - name: "Label all pods for network policy"
         run: |
