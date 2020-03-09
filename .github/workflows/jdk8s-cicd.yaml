@@ -21,8 +21,10 @@ jobs:
     runs-on: self-hosted
     steps:
       # checkout branch
-      - name: git checkout master branch
-        uses: actions/checkout@master
+      - name: git checkout branch
+        uses: actions/checkout@v2
+        with:
+          ref: applitools
 
       # log into Azure
       - name: "Login via Azure CLI"
@@ -415,6 +417,7 @@ jobs:
       nameSpace: jfrog
       artDockerURL: jfrogjd-docker.jfrog.io
       hostname: ghchattybot-dev.k8s.az.jessicadeen.com
+      TEST_START_PAGE: https://ghchattybot-dev.k8s.az.jessicadeen.com
     steps:
       - name: "configure deployment environment"
         run: |
@@ -468,8 +471,7 @@ jobs:
 
       - name: "Visual Testing"
         env:
-          APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}
-          TEST_START_PAGE: https://ghchattybot-dev.k8s.az.jessicadeen.com
+          APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}    
         run: mvn -f visual_tests/pom.xml clean test test
 
       - name: "Label all pods for network policy"
