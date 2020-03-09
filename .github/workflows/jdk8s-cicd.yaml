@@ -447,9 +447,9 @@ jobs:
 
               printf '.'
               attempt_counter=$(($attempt_counter+1))
-              sleep 15
+              sleep 20
           done
-          
+
       - name: Applitools Build Task
         run: |
           # set batch ID
