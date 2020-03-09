@@ -470,7 +470,8 @@ jobs:
           echo "::set-env name=TEST_START_PAGE::$TEST_START_PAGE"
           echo "Setting environment variable TEST_START_PAGE_TEST: $TEST_START_PAGE"
       
-      - uses: actions/setup-java@v1
+      - name: "Set JDK version"
+        uses: actions/setup-java@v1
         with:
           java-version: '13'
           architecture: x64
