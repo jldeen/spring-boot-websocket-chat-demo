@@ -463,7 +463,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '13'
-
+      - name: "troubleshooting"
+        run: |
+          pwd 
+          echo ''
+          cat visual_tests/src/test/java/tests/ChattyBotTests.java
       - name: "Visual Testing"
         env:
           APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}    
@@ -473,6 +477,7 @@ jobs:
         run: |
           # add label
           kubectl label -n $nameSpace pods --all role=spring-app-dev --overwrite=true
+
   deployMicroservicesProd:
     runs-on: self-hosted
     needs: buildImages
