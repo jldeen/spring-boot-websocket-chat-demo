@@ -28,7 +28,7 @@ public class BaseTests {
 
     WebDriverManager.chromedriver().setup();
     ChromeOptions ChromeOptions = new ChromeOptions();
-    ChromeOptions.addArguments("--headless", "--no-sandbox", "--disable-gpu");
+    ChromeOptions.addArguments("--headless", "--no-sandbox");
     driver = new ChromeDriver(ChromeOptions);
 
     // For use with Applitools
