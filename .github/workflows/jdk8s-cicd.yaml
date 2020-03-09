@@ -433,10 +433,10 @@ jobs:
           echo "::set-env name=AKS_CLUSTER::$(az aks list --resource-group $resourceGroup --query [0].name -o tsv)"
           echo "::set-env name=INGRESS::$(az aks show -n $AKS_CLUSTER -g $resourceGroup --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName -o tsv)"
 
-      - name: "helm install chattybot dev"
-        run: |
-          # spring deploy
-          helm upgrade --install chattybot-dev $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=$hostname --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
+      # - name: "helm install chattybot dev"
+      #   run: |
+      #     # spring deploy
+      #     helm upgrade --install chattybot-dev $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=$hostname --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
 
       - name: Applitools Build Task
         run: |
