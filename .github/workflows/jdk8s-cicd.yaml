@@ -414,7 +414,7 @@ jobs:
     env:
       nameSpace: jfrog
       artDockerURL: jfrogjd-docker.jfrog.io
-      hostname: https://ghchattybot-dev.k8s.az.jessicadeen.com
+      hostname: ghchattybot-dev.k8s.az.jessicadeen.com
     steps:
       - name: "configure deployment environment"
         run: |
@@ -429,7 +429,7 @@ jobs:
         run: |
           # spring deploy
           helm upgrade --install chattybot-dev $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=$hostname--set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
-          
+
       - name: Applitools Build Task
         run: |
           # set batch ID
