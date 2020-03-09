@@ -453,11 +453,13 @@ jobs:
           
           echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
       
-      - name: "Visual Testing"
+      - name: "Setup JDK"
         uses: actions/setup-java@v1
         with:
           java-version: '13'
-      - run: mvn -f visual_tests/pom.xml clean test
+
+      - name: "Visual Testing"    
+        run: mvn -f visual_tests/pom.xml clean test test
 
       - name: "Label all pods for network policy"
         run: |
