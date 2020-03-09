@@ -434,7 +434,19 @@ jobs:
           # spring deploy
           helm upgrade --install chattybot-dev $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=$hostname --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
           
-          sleep 60
+          attempt_counter=0
+          max_attempts=5
+
+          until $(curl --output /dev/null --silent --head --fail https://$hostname/); do
+              if [ ${attempt_counter} -eq ${max_attempts} ];then
+                echo "Max attempts reached"
+                exit 1
+              fi
+
+              printf '.'
+              attempt_counter=$(($attempt_counter+1))
+              sleep 15
+          done
 
       - name: Applitools Build Task
         run: |
@@ -475,8 +487,8 @@ jobs:
       - name: "Visual Testing"
         env:
           APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}
-          TEST_START_PAGE: https://ghchattybot-dev.k8s.az.jessicadeen.com    
-        run: mvn -f visual_tests/pom.xml clean test test
+          TEST_START_PAGE: https://$hostname   
+        run: mvn -f visual_tests/pom.xml clean test
 
       - name: "Label all pods for network policy"
         run: |
