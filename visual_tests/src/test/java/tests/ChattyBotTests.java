@@ -19,14 +19,14 @@ public class ChattyBotTests extends BaseTests {
         _testStartPage = System.getenv().get("TEST_START_PAGE");
         eyes.setBatch(new BatchInfo("ChattyBot"));
 
-        // // obtain the batch name and ID from the environment variables
-        // String batchName = System.getenv("APPLITOOLS_BATCH_NAME");
-        // String batchId   = System.getenv("APPLITOOLS_BATCH_ID");
+        // obtain the batch name and ID from the environment variables
+        String batchName = System.getenv("APPLITOOLS_BATCH_NAME");
+        String batchId   = System.getenv("APPLITOOLS_BATCH_ID");
 
-        // // set the batch
-        // BatchInfo batchInfo = new BatchInfo(batchName); 
-        // batchInfo.setId(batchId);
-        // eyes.setBatch(batchInfo);
+        // set the batch
+        BatchInfo batchInfo = new BatchInfo(batchName); 
+        batchInfo.setId(batchId);
+        eyes.setBatch(batchInfo);
     }
 
     @Before 
