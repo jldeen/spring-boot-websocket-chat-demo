@@ -54,4 +54,4 @@ jobs:
       - name: "Visual Testing"
         env:
           APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}    
-        run: mvn -version && mvn -f visual_tests/pom.xml clean test test
+        run: mvn -f visual_tests/pom.xml clean test test
