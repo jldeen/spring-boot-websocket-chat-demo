@@ -433,7 +433,9 @@ jobs:
         run: |
           # spring deploy
           helm upgrade --install chattybot-dev $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=$hostname --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
-          
+
+      - name: http check
+        run: |
           attempt_counter=0
           max_attempts=5
 
@@ -447,7 +449,7 @@ jobs:
               attempt_counter=$(($attempt_counter+1))
               sleep 15
           done
-
+          
       - name: Applitools Build Task
         run: |
           # set batch ID
