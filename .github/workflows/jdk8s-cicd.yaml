@@ -318,6 +318,13 @@ jobs:
       SERVER_ID: jfrog-jd
       SLACK_CHANNEL: chattybot
     steps:
+      # checkout branch
+      - name: git checkout branch
+        uses: actions/checkout@v2
+        with:
+          ref: applitools
+          clean: 'true'
+
       - name: "jfrog install, configure cli"
         run: |
           # Get Jfrog CLI
