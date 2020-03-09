@@ -467,7 +467,7 @@ jobs:
       - name: "Visual Testing"
         env:
           APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}    
-        run: mvn -f visual_tests/pom.xml clean test test
+        run: mvn -version && export JAVA_HOME= && mvn -f visual_tests/pom.xml clean test test
 
       - name: "Label all pods for network policy"
         run: |
