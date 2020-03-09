@@ -458,7 +458,9 @@ jobs:
         with:
           java-version: '13'
 
-      - name: "Visual Testing"    
+      - name: "Visual Testing"
+        env:
+          APPLITOOLS_API_KEY: ${{ secrtes.APPLITOOLS_API_KEY }}    
         run: mvn -f visual_tests/pom.xml clean test test
 
       - name: "Label all pods for network policy"
