@@ -4,7 +4,7 @@ name: visual-testing-cicd
 
 jobs:
   deployMicroservicesDev:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       TEST_START_PAGE: ghchattybot-dev.k8s.az.jessicadeen.com
     steps:
