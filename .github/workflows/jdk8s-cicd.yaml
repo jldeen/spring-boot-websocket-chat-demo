@@ -423,35 +423,35 @@ jobs:
         run: |
           # spring deploy
           helm upgrade --install chattybot-dev $GITHUB_WORKSPACE/spring-boot-websocket-chat-demo-v0.1.0.tgz --namespace=$nameSpace --set ingress.hostname=$TEST_START_PAGE --set image.repository=$artDockerURL/$GITHUB_REPOSITORY --set image.tag=$GITHUB_SHA --set buildID=$GITHUB_RUN_ID
-      - name: Applitools Build Task
-        run: |
-          # set batch ID
-          APPLITOOLS_BATCH_ID=${{ github.run_id }}
+      # - name: Applitools Build Task
+      #   run: |
+      #     # set batch ID
+      #     APPLITOOLS_BATCH_ID=${{ github.run_id }}
 
-          echo "::set-env name=APPLITOOLS_BATCH_ID::${{ github.run_id }}"
+      #     echo "::set-env name=APPLITOOLS_BATCH_ID::${{ github.run_id }}"
           
-          echo "Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID"
+      #     echo "Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID"
 
-          # set batch name
-          APPLITOOLS_BATCH_NAME="GitHub Actions / ${{ github.workflow }}"
+      #     # set batch name
+      #     APPLITOOLS_BATCH_NAME="GitHub Actions / ${{ github.workflow }}"
 
-          echo "::set-env name=APPLITOOLS_BATCH_NAME::GitHub Actions / ${{ github.workflow }}"
+      #     echo "::set-env name=APPLITOOLS_BATCH_NAME::GitHub Actions / ${{ github.workflow }}"
           
-          echo "Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME"
+      #     echo "Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME"
 
-          # set server url
-          APPLITOOLS_SERVER_URL="https://eyes.applitools.com"
+      #     # set server url
+      #     APPLITOOLS_SERVER_URL="https://eyes.applitools.com"
 
-          echo "::set-env name=APPLITOOLS_SERVER_URL::https://eyes.applitools.com"
+      #     echo "::set-env name=APPLITOOLS_SERVER_URL::https://eyes.applitools.com"
           
-          echo "Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL"
+      #     echo "Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL"
 
-          # set batch sequence
-          APPLITOOLS_BATCH_SEQUENCE="GitHub Actions / ${{ github.workflow }}"
+      #     # set batch sequence
+      #     APPLITOOLS_BATCH_SEQUENCE="GitHub Actions / ${{ github.workflow }}"
 
-          echo "::set-env name=APPLITOOLS_BATCH_SEQUENCE::GitHub Actions / ${{ github.workflow }}"
+      #     echo "::set-env name=APPLITOOLS_BATCH_SEQUENCE::GitHub Actions / ${{ github.workflow }}"
           
-          echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
+      #     echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
       
       - name: "Setup JDK"
         uses: actions/setup-java@v1
