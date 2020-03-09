@@ -412,7 +412,7 @@ jobs:
 
   deployMicroservicesDev:
     runs-on: self-hosted
-    # needs: buildImages
+    needs: buildImages
     env:
       nameSpace: jfrog
       artDockerURL: jfrogjd-docker.jfrog.io
