@@ -486,6 +486,7 @@ jobs:
         env:
           APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}
           TEST_START_PAGE: https://ghchattybot-dev.k8s.az.jessicadeen.com/
+          RUNWHERE: pipeline
         run: mvn -f visual_tests/pom.xml clean test
 
       - name: "Label all pods for network policy"
