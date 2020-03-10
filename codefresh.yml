@@ -217,21 +217,18 @@ steps:
     title: "Http check"
     stage: "test"
     shell: bash
-    command: >
-      attempt_counter=0
-      max_attempts=5
+    commands:
+      - attempt_counter=0 max_attempts=5
+      - until $(curl --output /dev/null --silent --head --fail https://$hostname/); do
+      - if [ ${attempt_counter} -eq ${max_attempts} ];then
+      - echo "Max attempts reached"
+      - exit 1
+      - fi
+      - printf '.'
+      - attempt_counter=$(($attempt_counter+1))
+      - sleep 20
+      - done
 
-      until $(curl --output /dev/null --silent --head --fail https://$hostname/); do
-          if [ ${attempt_counter} -eq ${max_attempts} ];then
-            echo "Max attempts reached"
-            exit 1
-          fi
-
-          printf '.'
-          attempt_counter=$(($attempt_counter+1))
-          sleep 20
-      done
-  
   applitools_task:
     image: tutum/curl
     title: "Applitools Build Task"
