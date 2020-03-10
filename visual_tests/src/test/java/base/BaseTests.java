@@ -12,6 +12,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+// containers
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+// begin test classes
 public class BaseTests {
 
   protected static WebDriver driver;
@@ -20,16 +27,16 @@ public class BaseTests {
   protected static ChromeOptions options = new ChromeOptions();
 
   @BeforeClass
-  public static void setUp() {
+  public static void setUp(String[]  args) throws MalformedURLException, InterruptedException{
+    // Standard local visual test call
     // WebDriverManager.chromedriver().setup();
-    // ChromeOptions options = new ChromeOptions();
-    // options.addArguments("--headless");
     // driver = new ChromeDriver();
 
-    WebDriverManager.chromedriver().setup();
-    ChromeOptions ChromeOptions = new ChromeOptions();
-    ChromeOptions.addArguments("--headless", "--no-sandbox");
-    driver = new ChromeDriver(ChromeOptions);
+    // CI/CD Container or Remote Selenium hub
+    String Selenium = "http://selenium_hub:4444/wd/hub";
+    DesiredCapabilities cap = DesiredCapabilities.Chrome();
+
+    driver = new RemoteWebDriver(new URL(Selenium), cap);
 
     // For use with Applitools
     eyes = new Eyes();

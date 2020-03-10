@@ -1,8 +1,49 @@
 version: "1.0"
+services:
+  name: selenium_hub
+  composition:
+    selenium_hub:
+      image: selenium/hub:latest
+      ports:
+        - 4444
+      environment:
+        - SE_OPTS=-debug
+        - GRID_MAX_SESSION=5
+
+    chrome_node:
+      image: selenium/node-chrome:latest
+      ports:
+        - 5900
+        - 5555
+      command: bash -c "sleep 5 && /opt/bin/entry_point.sh"
+      depends_on: 
+        - selenium_hub
+      environment:
+        - HUB_HOST=selenium_hub
+        - REMOTE_HOST=http://chrome_node:5555
+        - NODE_MAX_SESSION=5
+        - NODE_MAX_INSTANCES=5
+
+    firefox_node:
+      image: selenium/node-firefox:latest
+      user: 1000:1000
+      ports:
+        - 5900
+        - 5555
+      command: bash -c "sleep 5 && /opt/bin/entry_point.sh"
+      depends_on: 
+        - selenium_hub
+      environment:
+        - HUB_HOST=selenium_hub
+        - REMOTE_HOST=http://firefox_node:5555
+        - NODE_MAX_SESSION=5
+        - NODE_MAX_INSTANCES=5
+
 stages:
   - "build"
   - "test"
   - "deploy"
+  
 steps:
   main_clone:
     type: "git-clone"
@@ -152,12 +193,37 @@ steps:
       - curl -X POST --data-urlencode 'payload={"text":"JFrog XRay Scan Report for Codefresh Build ${{CF_BUILD_ID}}","attachments":[{"fallback":"JFrog XRay Scan Report for Codefresh Build ${{CF_BUILD_ID}}","color":"'$slackStyle'","author_link":"'$JF_XRAY_RPT'","title":"JFrog XRay Scan Report","title_link":"'$JF_XRAY_RPT'","text":"JFrog Xray Scan Report for Build ${{CF_BUILD_ID}}","fields":[{"title":"XRay Alerts","value":"'$JF_XRAY_ALERTS' alerts were generated","short":false},{"title":"Requested for","value":"Jessica Deen","short":false}],"footer":"JFrog XRay Scan Notifications","footer_icon":"https:\/\/www.clipartmax.com\/png\/middle\/69-698347_jfrog-artifactory-logo.png"}]}' ${{SLACK_WEBHOOK_URL}}
       - if [[ $JF_SCAN_FAIL == *true* ]]; then exit 1; else exit 0; fi
 
+  helm_dev:
+    type: helm
+    title: Deploy with Helm3 Dev
+    fail_fast: true
+    stage: "deploy"
+    arguments:
+      kube_context: jdk8s20
+      chart_name: /codefresh/volume/spring-boot-websocket-chat-demo/charts/spring-boot-websocket-chat-demo
+      release_name: cf-chattybot-dev
+      action: install
+      namespace: cf-chattybot-dev
+      helm_version: 3.0.3
+      custom_values:
+        - "buildID=${{CF_BUILD_ID}}"
+        - replicaCount=3
+        - "ingress.hostname=${{INGRESS_HOSTNAME_DEV}}"
+        - "image.repository=${{REPOSITORY}}"
+        - "image.tag=${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}"
+
+  visual_testing:
+    image: maven:3.6.3-jdk-13
+    title: "Running Visual Tests"
+    commands:
+      - 'mvn clean test'
+  
   askForPermission:
     type: pending-approval
     stage: "test"
     title: Promote to QA/Prod
 
-  helm:
+  helm_prod:
     type: helm
     title: Deploy with Helm3
     fail_fast: true
