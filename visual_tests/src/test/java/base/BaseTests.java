@@ -24,8 +24,6 @@ public class BaseTests {
   protected static Eyes eyes;
   protected static HomePage homePage;
   protected static ChromeOptions options = new ChromeOptions();
-  
-  private static String _useWebDriver;
   private static String _runWhere;
 
   @BeforeClass

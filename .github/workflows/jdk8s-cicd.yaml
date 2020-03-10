@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - applitools
+  pull_request:
+    branches:
+      - applitools
 
 name: jdk8s-full-cicd
 
