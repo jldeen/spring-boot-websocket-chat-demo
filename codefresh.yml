@@ -214,22 +214,14 @@ steps:
         - "image.tag=${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}"
 
   http_check:
-    image: tutum/curl
+    image: jldeen/docker-jfrog-cli-java:1.0.4
     title: "Http Check"
     stage: "deploy dev"
     shell: bash
     commands:
-      - export attempt_counter=0 
-      - export max_attempts=5
-      - "until $(curl --output /dev/null --silent --head --fail https://${{INGRESS_HOSTNAME_DEV}}/); do"
-      - "if [ ${attempt_counter} -eq ${max_attempts} ];then"
-      - echo "Max attempts reached"
-      - exit 1
-      - fi
-      - printf '.'
-      - export attempt_counter="$(($attempt_counter+1))"
-      - sleep 20
-      - done
+      - export attempt_counter=0
+      - export export max_attempts=5
+      - until $(curl --output /dev/null --silent --head --fail https://'${{INGRESS_HOSTNAME_DEV}}'/); do if [ ${attempt_counter} -eq ${max_attempts} ];then echo "Max attempts reached"; exit 1; fi; printf '.';         attempt_counter=$(($attempt_counter+1)); sleep 20; done
   
   applitools_task:
     image: tutum/curl
