@@ -13,7 +13,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 // containers
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,9 +32,8 @@ public class BaseTests {
     // driver = new ChromeDriver();
 
     // CI/CD Container or Remote Selenium hub
-    String Selenium = "http://selenium_hub:4444/wd/hub";
-    DesiredCapabilities cap = DesiredCapabilities.chrome();
-    cap.setBrowserName("chrome");
+    String Selenium = "http://127.0.0.1:4444/wd/hub";
+    ChromeOptions cap = new ChromeOptions();
 
     driver = new RemoteWebDriver(new URL(Selenium), cap);
 
