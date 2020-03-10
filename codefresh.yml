@@ -240,14 +240,14 @@ steps:
       - export APPLITOOLS_BATCH_SEQUENCE=CF-${{CF_SHORT_REVISION}}
       - echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE - $APPLITOOLS_BATCH_SEQUENCE"
       - cf_export APPLITOOLS_BATCH_SEQUENCE=$APPLITOOLS_BATCH_SEQUENCE
-      - export TEST_START_PAGE=https://${{INGRESS_HOSTNAME_DEV}}
-      - echo "Setting environment variable TEST_START_PAGE_TEST - $TEST_START_PAGE"
-      - cf_export TEST_START_PAGE=$TEST_START_PAGE
     
   visual_testing:
     image: maven:3.6.3-jdk-13
     title: "Running Visual Tests"
     stage: "deploy dev"
+    environment:
+        - RUNWHERE=container
+        - TEST_START_PAGE=https://${{INGRESS_HOSTNAME_DEV}}
     commands:
       - 'mvn -Dmaven.repo.local=/codefresh/volume/m2_repository -f visual_tests/pom.xml clean test'
     services:
