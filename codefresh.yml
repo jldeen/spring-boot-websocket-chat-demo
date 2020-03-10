@@ -61,9 +61,8 @@ steps:
     stage: "build"
     commands:
       - export M2_HOME=/usr/share/maven
-      - export MAVEN_OPTS="-Dmaven.repo.local=/volume/codefresh/"
       - jfrog rt config ${{JFROG_SERVER_ID}} --url=https://jfrogjd.jfrog.io/jfrogjd --user=${{JFROG_USER}} --password=${{JFROG_PASS}} --interactive=false
-      - jfrog rt mvn "clean install -U -Dproject.version=${{CF_BUILD_ID}} -Dartifactory.publish.buildInfo=true" --build-name=${{CF_REPO_NAME}}-2020 --build-number=${{CF_BUILD_ID}}
+      - jfrog rt mvn "clean install -Dmaven.repo.local=/codefresh/volume/m2_repository -Dproject.version=${{CF_BUILD_ID}} -Dartifactory.publish.buildInfo=true" --build-name=${{CF_REPO_NAME}}-2020 --build-number=${{CF_BUILD_ID}}
       - jfrog rt build-collect-env ${{CF_REPO_NAME}}-2020 ${{CF_BUILD_ID}}
 
   BuildingDockerImage:
@@ -250,7 +249,7 @@ steps:
     title: "Running Visual Tests"
     stage: "deploy dev"
     commands:
-      - 'mvn -f visual_tests/pom.xml clean test'
+      - 'mvn -Dmaven.repo.local=/codefresh/volume/m2_repository -f visual_tests/pom.xml clean test'
     services:
       - selenium_hub
 
