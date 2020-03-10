@@ -233,7 +233,7 @@ steps:
       done
   
   applitools_task:
-    image:
+    image: tutum/curl
     title: "Applitools Build Task"
     stage: "test"
     shell: bash
