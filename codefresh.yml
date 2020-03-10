@@ -42,7 +42,8 @@ services:
 stages:
   - "build"
   - "test"
-  - "deploy"
+  - "deploy dev"
+  - "deploy prod"
 
 steps:
   main_clone:
@@ -87,7 +88,7 @@ steps:
     image: devth/helm
     commands:
       - helm lint ./charts/spring-boot-websocket-chat-demo
-    stage: "test"
+    stage: "build"
 
   PackageHelmChart:
     title: helm package
@@ -197,7 +198,7 @@ steps:
     type: helm
     title: Deploy with Helm3 Dev
     fail_fast: true
-    stage: "deploy"
+    stage: "deploy dev"
     arguments:
       kube_context: jdk8s20
       chart_name: /codefresh/volume/spring-boot-websocket-chat-demo/charts/spring-boot-websocket-chat-demo
@@ -215,7 +216,7 @@ steps:
   http_check:
     image: tutum/curl
     title: "Http Check"
-    stage: "test"
+    stage: "deploy dev"
     shell: bash
     commands:
       - export attempt_counter=0 
@@ -233,7 +234,7 @@ steps:
   applitools_task:
     image: tutum/curl
     title: "Applitools Build Task"
-    stage: "test"
+    stage: "deploy dev"
     commands:
       - export APPLITOOLS_BATCH_ID=CF-${{CF_SHORT_REVISION}}
       - echo "Setting environment variable APPLITOOLS_BATCH_ID - $APPLITOOLS_BATCH_ID"
@@ -254,20 +255,20 @@ steps:
   visual_testing:
     image: maven:3.6.3-jdk-13
     title: "Running Visual Tests"
-    stage: "test"
+    stage: "deploy dev"
     commands:
       - 'mvn -f visual_tests/pom.xml clean test'
 
   askForPermission:
     type: pending-approval
-    stage: "deploy"
+    stage: "deploy dev"
     title: Promote to QA/Prod
 
   helm_prod:
     type: helm
     title: Deploy with Helm3
     fail_fast: true
-    stage: "deploy"
+    stage: "deploy prod"
     when:
       steps:
         - name: askForPermission
@@ -288,7 +289,7 @@ steps:
         - "image.tag=${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}"
   notes:
     image: alpine:3.11.3
-    stage: "deploy"
+    stage: "deploy prod"
     commands:
       - echo "Your application can be viewed at ${{INGRESS_HOSTNAME}}."
     on_success:
