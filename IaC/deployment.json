@@ -90,7 +90,7 @@
           {
             "name": "agentpool",
             "osDiskSizeGB": 0,
-            "count": 3,
+            "count": 6,
             "vmSize": "Standard_D2_v2",
             "osType": "Linux",
             "storageProfile": "ManagedDisks",
