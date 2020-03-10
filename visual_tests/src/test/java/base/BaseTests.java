@@ -13,8 +13,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 // containers
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -27,14 +27,15 @@ public class BaseTests {
   protected static ChromeOptions options = new ChromeOptions();
 
   @BeforeClass
-  public static void setUp(String[]  args) throws MalformedURLException, InterruptedException{
+  public static void setUp() throws MalformedURLException, InterruptedException{
     // Standard local visual test call
     // WebDriverManager.chromedriver().setup();
     // driver = new ChromeDriver();
 
     // CI/CD Container or Remote Selenium hub
     String Selenium = "http://selenium_hub:4444/wd/hub";
-    DesiredCapabilities cap = DesiredCapabilities.Chrome();
+    DesiredCapabilities cap = DesiredCapabilities.chrome();
+    cap.setBrowserName("chrome");
 
     driver = new RemoteWebDriver(new URL(Selenium), cap);
 
