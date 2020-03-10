@@ -32,7 +32,7 @@ public class BaseTests {
     // driver = new ChromeDriver();
 
     // CI/CD Container or Remote Selenium hub
-    String Selenium = "http://127.0.0.1:4444/wd/hub";
+    String Selenium = "http://selenium_hub:4444/wd/hub";
     ChromeOptions cap = new ChromeOptions();
 
     driver = new RemoteWebDriver(new URL(Selenium), cap);
