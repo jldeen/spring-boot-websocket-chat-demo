@@ -43,7 +43,7 @@ stages:
   - "build"
   - "test"
   - "deploy"
-  
+
 steps:
   main_clone:
     type: "git-clone"
@@ -211,12 +211,55 @@ steps:
         - "ingress.hostname=${{INGRESS_HOSTNAME_DEV}}"
         - "image.repository=${{REPOSITORY}}"
         - "image.tag=${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}"
+  
+  http_check:
+    image: tutum/curl
+    title: "Http check"
+    stage: "test"
+    shell: bash
+    command: >
+      attempt_counter=0
+      max_attempts=5
 
+      until $(curl --output /dev/null --silent --head --fail https://$hostname/); do
+          if [ ${attempt_counter} -eq ${max_attempts} ];then
+            echo "Max attempts reached"
+            exit 1
+          fi
+
+          printf '.'
+          attempt_counter=$(($attempt_counter+1))
+          sleep 20
+      done
+  
+  applitools_task:
+    image:
+    title: "Applitools Build Task"
+    stage: "test"
+    shell: bash
+    commands:
+      - export APPLITOOLS_BATCH_ID=CF-${{CF_SHORT_REVISION}}
+      - echo "Setting environment variable APPLITOOLS_BATCH_ID: $APPLITOOLS_BATCH_ID"
+      - cf_export APPLITOOLS_BATCH_ID=$APPLITOOLS_BATCH_ID
+      - APPLITOOLS_BATCH_NAME="Codefresh / ${{CF_SHORT_REVISION}}
+      - echo "Setting environment variable APPLITOOLS_BATCH_NAME: $APPLITOOLS_BATCH_NAME"
+      - cf_export APPLITOOLS_BATCH_NAME=$APPLITOOLS_BATCH_NAME
+      - export APPLITOOLS_SERVER_URL="https://eyes.applitools.com"
+      - echo "Setting environment variable APPLITOOLS_SERVER_URL: $APPLITOOLS_SERVER_URL"
+      - cf_export APPLITOOLS_SERVER_URL=$APPLITOOLS_SERVER_URL
+      - export APPLITOOLS_BATCH_SEQUENCE=CF-${{CF_SHORT_REVISION}}
+      - echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
+      - cf_export APPLITOOLS_BATCH_SEQUENCE=$APPLITOOLS_BATCH_SEQUENCE
+      - export TEST_START_PAGE=https://${{INGRESS_HOSTNAME_DEV}}
+      - echo "Setting environment variable TEST_START_PAGE_TEST: $TEST_START_PAGE"
+      - cf_export TEST_START_PAGE=$TEST_START_PAGE
+  
   visual_testing:
     image: maven:3.6.3-jdk-13
     title: "Running Visual Tests"
+    stage: "test"
     commands:
-      - 'mvn clean test'
+      - 'mvn -f visual_tests/pom.xml clean test'
   
   askForPermission:
     type: pending-approval
