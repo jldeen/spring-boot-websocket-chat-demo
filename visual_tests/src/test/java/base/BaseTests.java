@@ -24,6 +24,8 @@ public class BaseTests {
   protected static Eyes eyes;
   protected static HomePage homePage;
   protected static ChromeOptions options = new ChromeOptions();
+  
+  private static String _useWebDriver;
   private static String _runWhere;
 
   @BeforeClass
@@ -31,14 +33,15 @@ public class BaseTests {
   
     _runWhere = System.getenv("RUNWHERE");
     ChromeOptions ChromeOptions = new ChromeOptions();
-    WebDriverManager.chromedriver().setup();
 
     if (_runWhere.equals("local")) {
       // Standard local visual test call
+      WebDriverManager.chromedriver().setup();
       driver = new ChromeDriver();
     } 
     else if (_runWhere.equals("pipeline")) {
       // build server headless chrome CI/CD example
+      WebDriverManager.chromedriver().setup();
       ChromeOptions.addArguments("--headless", "--no-sandbox");
       driver = new ChromeDriver(ChromeOptions);
     }
