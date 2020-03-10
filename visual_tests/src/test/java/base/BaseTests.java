@@ -12,7 +12,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-// containers
+// container cicd packages
 import org.openqa.selenium.remote.RemoteWebDriver;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,11 +31,15 @@ public class BaseTests {
     // WebDriverManager.chromedriver().setup();
     // driver = new ChromeDriver();
 
-    // CI/CD Container or Remote Selenium hub
-    String Selenium = "http://selenium_hub:4444/wd/hub";
-    ChromeOptions cap = new ChromeOptions();
+    ChromeOptions ChromeOptions = new ChromeOptions();
 
-    driver = new RemoteWebDriver(new URL(Selenium), cap);
+    // selenium hub remote settings (container based CI/CD)
+    String Selenium = "http://selenium_hub:4444/wd/hub";
+    driver = new RemoteWebDriver(new URL(Selenium), ChromeOptions);
+
+    //// build server headless chrome CI/CD example
+    // ChromeOptions.addArguments("--headless", "--no-sandbox");
+    // driver = new ChromeDriver(ChromeOptions);
 
     // For use with Applitools
     eyes = new Eyes();
