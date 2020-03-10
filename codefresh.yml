@@ -244,11 +244,10 @@ steps:
   visual_testing:
     image: maven:3.6.3-jdk-13
     title: "Running Visual Tests"
-    stage: "deploy dev"
-    environment:
-        - RUNWHERE=container
-        - TEST_START_PAGE=https://${{INGRESS_HOSTNAME_DEV}}
+    stage: "deploy dev"   
     commands:
+      - export RUNWHERE=container
+      - export TEST_START_PAGE=https://${{INGRESS_HOSTNAME_DEV}}
       - 'mvn -Dmaven.repo.local=/codefresh/volume/m2_repository -f visual_tests/pom.xml clean test'
     services:
       - selenium_hub
