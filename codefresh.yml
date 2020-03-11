@@ -208,7 +208,6 @@ steps:
       helm_version: 3.0.3
       custom_values:
         - "buildID=${{CF_BUILD_ID}}"
-        - replicaCount=3
         - "ingress.hostname=${{INGRESS_HOSTNAME_DEV}}"
         - "image.repository=${{REPOSITORY}}"
         - "image.tag=${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}"
