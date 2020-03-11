@@ -9,7 +9,7 @@ public class ChattyBotTests extends BaseTests {
 
     private ChatPage chatPage;
 
-    @Before 
+    @Before
     public void startSession(){
         driver.get(testStartPage);
         homePage.enterUsername("angie");
@@ -22,13 +22,13 @@ public class ChattyBotTests extends BaseTests {
     }
 
     @Test
-    public void enterMessage() {
+    public void enterMessage(){
         chatPage.sendMessage("hello world");
         validateWindow();
     }
 
     @Test
-    public void enterMessages() {
+    public void multiUser(){
         chatPage.sendMessage("hello world");
         chatPage.sendMessage("goodbye world");
         validateWindow();

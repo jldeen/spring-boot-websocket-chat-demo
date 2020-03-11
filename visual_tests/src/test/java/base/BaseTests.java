@@ -86,5 +86,4 @@ public class BaseTests {
     eyes.check(Target.window().ignore(By.xpath("//ul/li/p[text()='angie left!']")));
     eyes.close();
   }
-
 }
