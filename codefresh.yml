@@ -194,20 +194,20 @@ steps:
       - if [[ $JF_SCAN_FAIL == *true* ]]; then exit 1; else exit 0; fi
   
   helm_dev1:
-  title: Deploy to Dev with Helm3
-  fail_fast: true
-  stage: "deploy dev"
-  image: codefresh/cfstep-helm:3.0.3
-  environment:
-    - CHART_REF=$PACKAGE
-    - RELEASE_NAME=cf-chattybot-dev
-    - KUBE_CONTEXT=jdk8s20
-    - NAMESPACE=cf-chattybot-dev
-    - ACTION=install
-    - VALUE_buildID=${{CF_BUILD_ID}}
-    - VALUE_ingress_hostname=${{INGRESS_HOSTNAME_DEV}}
-    - VALUE_image_repository=${{REPOSITORY}}
-    - VALUE_image_tag=${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}
+    title: Deploy to Dev with Helm3
+    fail_fast: true
+    stage: "deploy dev"
+    image: codefresh/cfstep-helm:3.0.3
+    environment:
+      - CHART_REF=$PACKAGE
+      - RELEASE_NAME=cf-chattybot-dev
+      - KUBE_CONTEXT=jdk8s20
+      - NAMESPACE=cf-chattybot-dev
+      - ACTION=install
+      - VALUE_buildID=${{CF_BUILD_ID}}
+      - VALUE_ingress_hostname=${{INGRESS_HOSTNAME_DEV}}
+      - VALUE_image_repository=${{REPOSITORY}}
+      - VALUE_image_tag=${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}
 
   helm_dev2:
     type: helm
