@@ -201,7 +201,7 @@ steps:
     stage: "deploy dev"
     arguments:
       kube_context: jdk8s20
-      chart_name: /codefresh/volume/spring-boot-websocket-chat-demo/charts/spring-boot-websocket-chat-demo
+      chart_name: spring-boot-websocket-chat-demo/charts/spring-boot-websocket-chat-demo
       release_name: cf-chattybot-dev
       action: install
       namespace: cf-chattybot-dev
