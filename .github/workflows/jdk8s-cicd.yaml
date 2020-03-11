@@ -141,7 +141,7 @@ jobs:
 
       - name: "Jetstack Cert Manager Config"
         run: |
-          h3 ls -n cert-manager | grep "cert-mgr" > /dev/null
+          helm ls -n cert-manager | grep "cert-mgr" > /dev/null
           result=$?
           if [ $result -eq 0 ] ; then
             echo "Cert manager is already installed."
