@@ -30,8 +30,17 @@ public class BaseTests {
   protected static String testStartPage;
 
   @BeforeClass
-  public static void setSuite(){
+  public static void setUp() throws MalformedURLException{
+
+    chromeOptions = new ChromeOptions();
+    WebDriverManager.chromedriver().setup();
+
+    getEnvironment();
     testStartPage = System.getenv().get("TEST_START_PAGE");
+    homePage = new HomePage(driver);
+      
+    // For use with Applitools
+    eyes = new Eyes();
 
     // obtain the batch name and ID from the environment variables
     String batchName = System.getenv("APPLITOOLS_BATCH_NAME");
@@ -41,19 +50,6 @@ public class BaseTests {
     BatchInfo batchInfo = new BatchInfo(batchName);
     batchInfo.setId(batchId);
     eyes.setBatch(batchInfo);
-  }
-
-  @BeforeClass
-  public static void setUp() throws MalformedURLException{
-
-    chromeOptions = new ChromeOptions();
-    WebDriverManager.chromedriver().setup();
-
-    getEnvironment();
-      
-    // For use with Applitools
-    eyes = new Eyes();
-    homePage = new HomePage(driver);
   }
 
   private static void getEnvironment() throws MalformedURLException {
