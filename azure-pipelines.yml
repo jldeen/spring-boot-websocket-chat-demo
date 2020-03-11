@@ -135,6 +135,8 @@ stages:
           # name: work-machine
           name: jldeenlinux
         environment: "chattybot-dev"
+        variables:
+          hostname: azdspring20-dev.k8s.az.jessicadeen.com
         strategy:
           runOnce:
             deploy:
@@ -166,17 +168,34 @@ stages:
                     chartType: "FilePath"
                     chartPath: "$(System.ArtifactsDirectory)/charts/spring-boot-websocket-chat-demo-v0.1.0.tgz"
                     releaseName: "azdspring-dev"
-                    overrideValues: "image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=azdspring20-dev.k8s.az.jessicadeen.com,buildID=$(Build.BuildId)"
+                    overrideValues: "image.repository=jfrogjd-docker.jfrog.io/jldeen/spring-boot-websocket-chat-demo,image.tag=$(Build.BuildId),ingress.hostname=$(hostname),buildID=$(Build.BuildId)"
                 
+                - bash: |
+                    # Run check to see when $(hostname) is available
+                    attempt_counter=0
+                    max_attempts=5
+
+                    until $(curl --output /dev/null --silent --head --fail https://"$(hostname)"/); do
+                        if [ ${attempt_counter} -eq ${max_attempts} ];then
+                          echo "Max attempts reached"
+                          exit 1
+                        fi
+
+                        printf '.'
+                        attempt_counter=$(($attempt_counter+1))
+                        sleep 20
+                    done
+                  displayName: HTTP Check
+
                 # - bash: |
                 #     ## testing env variable
                 #     echo "Applitools key in environment variable"
                 #     echo $APPLITOOLS_API_KEY
-                #     cd visual_tests && \
-                #     mvn clean test
+                #     mvn -f visual_tests/pom.xml clean test
                 #   displayName: "Visual Testing"
                 #   env:
                 #     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
+                
                 - task: ApplitoolsBuildTask@0
                 
                 - task: Maven@3
@@ -193,6 +212,8 @@ stages:
                     sonarQubeRunAnalysis: false
                   env:
                     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
+                    RUNWHERE: pipeline
+                    TEST_START_PAGE: https://$(hostname)
                   displayName: "Visual Testing"
 
   - stage: PromoteToProd
