@@ -264,7 +264,7 @@ steps:
           on:
             - approved
     environment:
-      - CHART_REF=$PACKAGE
+      - CHART_REF=charts/spring-boot-websocket-chat-demo
       - RELEASE_NAME=cf-chattybot1
       - KUBE_CONTEXT=jdk8s20
       - NAMESPACE=cf-chattybot
