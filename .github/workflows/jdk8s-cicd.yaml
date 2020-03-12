@@ -481,10 +481,10 @@ jobs:
           echo "::set-env name=APPLITOOLS_BATCH_SEQUENCE::$APPLITOOLS_BATCH_SEQUENCE"
           echo "Setting environment variable APPLITOOLS_BATCH_SEQUENCE: $APPLITOOLS_BATCH_SEQUENCE"
 
-          # # set test start page
-          # TEST_START_PAGE=https://$hostname
-          # echo "::set-env name=TEST_START_PAGE::$TEST_START_PAGE"
-          # echo "Setting environment variable TEST_START_PAGE_TEST: $TEST_START_PAGE"
+          # set test start page
+          TEST_START_PAGE=https://$hostname
+          echo "::set-env name=TEST_START_PAGE::$TEST_START_PAGE"
+          echo "Setting environment variable TEST_START_PAGE_TEST: $TEST_START_PAGE"
       
       - name: "Set JDK version"
         uses: actions/setup-java@v1
@@ -496,7 +496,7 @@ jobs:
       - name: "Visual Testing"
         env:
           APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}
-          TEST_START_PAGE: https://${{hostname}}
+          # TEST_START_PAGE: https://${{hostname}}
           RUNWHERE: pipeline
         run: mvn -f visual_tests/pom.xml clean test
 
