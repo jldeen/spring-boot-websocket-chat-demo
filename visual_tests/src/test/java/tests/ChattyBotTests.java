@@ -10,7 +10,7 @@ public class ChattyBotTests extends BaseTests {
 
     private ChatPage chatPage;
 
-    @Before 
+    @Before
     public void startSession(){
         driver.get(appUrl);
         homePage.enterUsername("angie");
@@ -29,19 +29,17 @@ public class ChattyBotTests extends BaseTests {
     }
 
     @Test
-    public void multiPersonChat() {
-
+    public void multiPersonChat(){
         //Angie sends message
         chatPage.sendMessage("hello world");
 
         //Jessica opens app and sends message
         WindowUtils.openNewTab(driver, appUrl);
-
         homePage.enterUsername("jessica");
         chatPage = homePage.clickStartChatting();
         chatPage.sendMessage("goodbye world");
 
-        WindowUtils.switchToTab(driver,1);
+        WindowUtils.switchToTab(driver, 1);
         validateWindow();
     }
 }
