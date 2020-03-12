@@ -186,7 +186,16 @@ stages:
                         sleep 20
                     done
                   displayName: HTTP Check
-              
+
+                # - bash: |
+                #     ## testing env variable
+                #     echo "Applitools key in environment variable"
+                #     echo $APPLITOOLS_API_KEY
+                #     mvn -f visual_tests/pom.xml clean test
+                #   displayName: "Visual Testing"
+                #   env:
+                #     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
+                
                 - task: ApplitoolsBuildTask@0
                 
                 - task: Maven@3
