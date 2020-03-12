@@ -18,10 +18,11 @@ public class ChatPage {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    private By eventMessage = By.className("event-message");
-    private By messageField = By.id("message");
-    private By sendButton     = By.cssSelector("#messageForm button");
-    private By sentMessage  = By.cssSelector(".chat-message p");
+    private By eventMessage      = By.className("event-message");
+    private By messageField      = By.id("message");
+    private By sendButton        = By.cssSelector("#messageForm button");
+    private By sentMessage       = By.cssSelector(".chat-message p");
+    public static By leftMessage = By.xpath("//ul/li/p[contains(text(),'left!')]");
 
     public ChatPage(WebDriver driver){
         this.driver = driver;

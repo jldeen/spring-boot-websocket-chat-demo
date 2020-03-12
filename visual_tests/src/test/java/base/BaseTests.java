@@ -5,7 +5,8 @@ import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.selenium.Eyes;
 import com.applitools.eyes.selenium.fluent.Target;
 import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.By;
+
+import pages.ChatPage;
 import pages.HomePage;
 
 import org.junit.BeforeClass;
@@ -27,11 +28,11 @@ public class BaseTests {
   protected static HomePage homePage;
   private static String runWhere;
   private static ChromeOptions chromeOptions;
-  protected static String testStartPage;
+  protected static String appUrl;
 
   @BeforeClass
   public static void setSuite(){
-    testStartPage = System.getenv().get("TEST_START_PAGE");
+    appUrl = System.getenv().get("TEST_START_PAGE");
 
     // obtain the batch name and ID from the environment variables
     String batchName = System.getenv("APPLITOOLS_BATCH_NAME");
@@ -87,8 +88,7 @@ public class BaseTests {
         "ChattyBot", 
         Thread.currentThread().getStackTrace()[2].getMethodName(),
         new RectangleSize(1200, 774));
-    eyes.check(Target.window().ignore(By.xpath("//ul/li/p[text()='angie left!']")));
+    eyes.check(Target.window().ignore(ChatPage.leftMessage));
     eyes.close();
   }
-
 }
