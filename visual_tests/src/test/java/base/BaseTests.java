@@ -28,10 +28,11 @@ public class BaseTests {
   protected static HomePage homePage;
   private static String runWhere;
   private static ChromeOptions chromeOptions;
+
   protected static String appUrl;
 
   @BeforeClass
-  public static void setSuite(){
+  public static void setEnv(){
     appUrl = System.getenv().get("TEST_START_PAGE");
 
     // obtain the batch name and ID from the environment variables

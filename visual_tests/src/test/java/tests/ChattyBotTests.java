@@ -23,7 +23,7 @@ public class ChattyBotTests extends BaseTests {
     }
 
     @Test
-    public void enterMessage() {
+    public void enterMessage(){
         chatPage.sendMessage("hello world");
         validateWindow();
     }
