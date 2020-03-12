@@ -28,6 +28,7 @@ public class BaseTests {
   protected static HomePage homePage;
   private static String runWhere;
   private static ChromeOptions chromeOptions;
+
   protected static String appUrl;
 
   @BeforeClass

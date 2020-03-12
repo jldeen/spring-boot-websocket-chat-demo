@@ -141,14 +141,22 @@ jobs:
 
       - name: "Jetstack Cert Manager Config"
         run: |
-          kubectl apply --validate=false \
-          -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.13/deploy/manifests/00-crds.yaml
+          helm ls -n cert-manager | grep "cert-mgr" > /dev/null
+          result=$?
+          if [ $result -eq 0 ] ; then
+            echo "Cert manager is already installed."
+          else
+            echo "Cert manager is not installed. Installing now."
 
-          helm repo add jetstack https://charts.jetstack.io
+            kubectl apply --validate=false \
+            -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.13/deploy/manifests/00-crds.yaml
 
-          helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
+            helm repo add jetstack https://charts.jetstack.io
 
-          kubectl apply -f IaC/cluster-issuer.yaml
+            helm upgrade --install cert-mgr --namespace cert-manager jetstack/cert-manager --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
+
+            kubectl apply -f IaC/cluster-issuer.yaml
+          fi
 
       - name: "Create jfrog-dev namespace/secret"
         env:
