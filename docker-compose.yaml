@@ -1,0 +1,38 @@
+version: '2'
+services:
+  selenium_hub:
+    image: selenium/hub:latest
+    ports:
+      - 4444:4444
+    environment:
+      - SE_OPTS=-debug
+      - GRID_MAX_SESSION=5
+
+  chrome_node:
+    image: selenium/node-chrome:latest
+    ports:
+      - 5900
+      - 5555
+    command: bash -c "sleep 5 && /opt/bin/entry_point.sh"
+    depends_on: 
+      - selenium_hub
+    environment:
+      - HUB_HOST=selenium_hub
+      - REMOTE_HOST=http://chrome_node:5555
+      - NODE_MAX_SESSION=5
+      - NODE_MAX_INSTANCES=5
+
+  firefox_node:
+    image: selenium/node-firefox:latest
+    user: 1000:1000
+    ports:
+      - 5900
+      - 5555
+    command: bash -c "sleep 5 && /opt/bin/entry_point.sh"
+    depends_on: 
+      - selenium_hub
+    environment:
+      - HUB_HOST=selenium_hub
+      - REMOTE_HOST=http://firefox_node:5555
+      - NODE_MAX_SESSION=5
+      - NODE_MAX_INSTANCES=5
