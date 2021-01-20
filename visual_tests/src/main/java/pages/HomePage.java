@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriver;
 public class HomePage {
     private WebDriver driver;
 
-    private By usernameField        = By.id("name");
+    private By usernameField       = By.id("name");
     private By startChattingButton = By.className("username-submit");
 
     public HomePage(WebDriver driver){

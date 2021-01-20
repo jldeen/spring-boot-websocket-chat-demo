@@ -1,6 +1,5 @@
-# FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jdk-alpine
 # FROM openjdk:11-jre-slim
-FROM jfrogjd-docker.jfrog.io/jldeen/alpine-jre-patched:2
 RUN apk update && apk add bash
 VOLUME /tmp
 ARG JAVA_OPTS
