@@ -3,19 +3,13 @@ trigger:
     include:
       - applitools
 
-variables:
-  # Agent VM image name
-  vmImageName: "jldeenlinux"
-
 stages:
   - stage: Build
     displayName: Build stage
     jobs:
       - job: Build
         displayName: Build
-        pool:
-          # name: work-machine
-          name: $(vmImageName)
+        pool: Azure Pipelines
         steps:
           - task: Maven@3
             inputs:
@@ -72,9 +66,7 @@ stages:
     jobs:
       - deployment: Deploy
         displayName: Deploy job
-        pool:
-          # name: work-machine
-          name: jldeenlinux
+        pool: Azure Pipelines
         environment: "chattybot-dev"
         strategy:
           runOnce:
@@ -149,9 +141,7 @@ stages:
     jobs:
       - deployment: Deploy
         displayName: Promote to Prod
-        pool:
-          # name: work-machine
-          name: jldeenlinux
+        pool: Azure Pipelines
         environment: "chattybot-prod"
         strategy:
           runOnce:
