@@ -88,7 +88,9 @@ stages:
                     checkLatestHelmVersion: false
                     installKubectl: true
                     kubectlVersion: "1.17.1"
-                    
+                
+                - bash: ls -la 
+                
                 - task: HelmDeploy@0
                   inputs:
                     connectionType: 'Azure Resource Manager'
