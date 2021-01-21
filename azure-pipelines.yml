@@ -101,24 +101,23 @@ stages:
                     chartPath: '$(Pipeline.Workspace)/drop/spring-boot-websocket-chat-demo-v0.1.0.tgz'
                     releaseName: 'azd-chattybot-dev'
                     overrideValues: 'image.repository=ttacrdl53e2sgw5z5i.azurecr.io/$(Build.Repository.Name),image.tag=$(Build.BuildId),ingress.hostname=$(hostname),buildID=$(Build.BuildId)'
-                    waitForExecution: false
 
-                - bash: |
-                    # Run check to see when $(HOSTNAME) is available
-                    attempt_counter=0
-                    max_attempts=5
+                # - bash: |
+                #     # Run check to see when $(HOSTNAME) is available
+                #     attempt_counter=0
+                #     max_attempts=5
 
-                    until $(curl --output /dev/null --silent --head --fail https://"$(HOSTNAME)"/); do
-                      if [ ${attempt_counter} -eq ${max_attempts} ];then
-                        echo "Max attempts reached"
-                        exit 1
-                      fi
+                #     until $(curl --output /dev/null --silent --head --fail https://"$(HOSTNAME)"/); do
+                #       if [ ${attempt_counter} -eq ${max_attempts} ];then
+                #         echo "Max attempts reached"
+                #         exit 1
+                #       fi
 
-                      printf '.'
-                      attempt_counter=$((attempt_counter+1))
-                      sleep 20
-                    done
-                  displayName: HTTP Check
+                #       printf '.'
+                #       attempt_counter=$((attempt_counter+1))
+                #       sleep 20
+                #     done
+                #   displayName: HTTP Check
 
                 - task: ApplitoolsBuildTask@0
                   displayName: Setup Applitools Visual Testing
