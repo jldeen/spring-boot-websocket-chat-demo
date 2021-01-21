@@ -21,9 +21,10 @@ ingress:
   enabled: true
   hostname: chattybot.k8s.az.jessicadeen.com
   annotations:
-     kubernetes.io/ingress.class: nginx
-     cert-manager.io/cluster-issuer: letsencrypt-prod
-     kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: addon-http-application-routing
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/tls-acme: "true"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
   tls: true
 applicationInsights:
   InstrumentationKey: 004d8eb9-d9af-49d0-bdda-b2d070eb1157
