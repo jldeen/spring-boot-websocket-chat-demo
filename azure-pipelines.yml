@@ -101,6 +101,7 @@ stages:
                     chartPath: '$(Pipeline.Workspace)/drop/spring-boot-websocket-chat-demo-v0.1.0.tgz'
                     releaseName: 'azd-chattybot-dev'
                     overrideValues: 'image.repository=ttacrdl53e2sgw5z5i.azurecr.io/$(Build.Repository.Name),image.tag=$(Build.BuildId),ingress.hostname=$(hostname),buildID=$(Build.BuildId)'
+                    waitForExecution: true
 
                 # - bash: |
                 #     # Run check to see when $(HOSTNAME) is available
