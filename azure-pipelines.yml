@@ -122,7 +122,8 @@ stages:
 
                 - task: ApplitoolsBuildTask@0
                   displayName: Setup Applitools Visual Testing
-
+                
+                - bash: echo 'Your TEST_START_PAGE variable is $(TEST_START_PAGE)'
                 - task: Maven@3
                   inputs:
                     mavenPomFile: 'visual_tests/pom.xml'
