@@ -51,6 +51,7 @@ stages:
             inputs:
               command: 'package'
               chartPath: 'charts/spring-boot-websocket-chat-demo'
+              destination: '$(Pipeline.Workspace)'
 
           - bash: ls -la 
           
