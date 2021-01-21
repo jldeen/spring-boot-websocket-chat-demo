@@ -139,6 +139,7 @@ stages:
                     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
                     RUNWHERE: pipeline
                     TEST_START_PAGE: https://$(hostname)
+                  displayName: "Run Visual Tests"
                     
   - stage: PromoteToProd
     displayName: Promote to Prod
