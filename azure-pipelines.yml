@@ -103,22 +103,22 @@ stages:
                     overrideValues: 'image.repository=ttacrdl53e2sgw5z5i.azurecr.io/$(Build.Repository.Name),image.tag=$(Build.BuildId),ingress.hostname=$(hostname),buildID=$(Build.BuildId)'
                     waitForExecution: false
 
-                # - bash: |
-                #     # Run check to see when $(hostname) is available
-                #     attempt_counter=0
-                #     max_attempts=5
+                - bash: |
+                    # Run check to see when $(hostname) is available
+                    attempt_counter=0
+                    max_attempts=5
 
-                #     until $(curl --output /dev/null --silent --head --fail http://"$(hostname)"/); do
-                #       if [ ${attempt_counter} -eq ${max_attempts} ];then
-                #         echo "Max attempts reached"
-                #         exit 1
-                #       fi
+                    until $(curl --output /dev/null --silent --head --fail http://"$(hostname)"/); do
+                      if [ ${attempt_counter} -eq ${max_attempts} ];then
+                        echo "Max attempts reached"
+                        exit 1
+                      fi
 
-                #       printf '.'
-                #       attempt_counter=$((attempt_counter+1))
-                #       sleep 20
-                #     done
-                #   displayName: HTTP Check
+                      printf '.'
+                      attempt_counter=$((attempt_counter+1))
+                      sleep 20
+                    done
+                  displayName: HTTP Check
 
                 - task: ApplitoolsBuildTask@0
 
@@ -126,10 +126,11 @@ stages:
                   inputs:
                     mavenPomFile: 'visual_tests/pom.xml'
                     goals: 'test'
-                    options: 'clean test'
+                    options: 'clean'
                     publishJUnitResults: true
                     testResultsFiles: '**/surefire-reports/TEST-*.xml'
                     javaHomeOption: 'JDKVersion'
+                    jdkVersionOption: '1.11'
                     mavenVersionOption: 'Default'
                     mavenAuthenticateFeed: false
                     effectivePomSkip: false
