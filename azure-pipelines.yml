@@ -104,11 +104,11 @@ stages:
                     waitForExecution: false
 
                 - bash: |
-                    # Run check to see when $(hostname) is available
+                    # Run check to see when $(HOSTNAME) is available
                     attempt_counter=0
                     max_attempts=5
 
-                    until $(curl --output /dev/null --silent --head --fail https://"$(hostname)"/); do
+                    until $(curl --output /dev/null --silent --head --fail https://"$(HOSTNAME)"/); do
                       if [ ${attempt_counter} -eq ${max_attempts} ];then
                         echo "Max attempts reached"
                         exit 1
@@ -122,8 +122,7 @@ stages:
 
                 - task: ApplitoolsBuildTask@0
                   displayName: Setup Applitools Visual Testing
-                
-                - bash: echo 'Your TEST_START_PAGE variable is $(TEST_START_PAGE)'
+
                 - task: Maven@3
                   inputs:
                     mavenPomFile: 'visual_tests/pom.xml'
@@ -140,6 +139,7 @@ stages:
                   env:
                     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
                     RUNWHERE: pipeline
+                    TEST_START_PAGE: "https://$(hostname)"
                   displayName: "Run Visual Tests"
                     
   - stage: PromoteToProd
