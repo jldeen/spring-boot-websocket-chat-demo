@@ -119,6 +119,12 @@ stages:
                       sleep 20
                     done
                   displayName: HTTP Check
+                
+                - task: JavaToolInstaller@0
+                  inputs:
+                    versionSpec: '13'
+                    jdkArchitectureOption: 'x64'
+                    jdkSourceOption: 'PreInstalled'
 
                 - task: ApplitoolsBuildTask@0
 
@@ -130,7 +136,6 @@ stages:
                     publishJUnitResults: true
                     testResultsFiles: '**/surefire-reports/TEST-*.xml'
                     javaHomeOption: 'JDKVersion'
-                    jdkVersionOption: '1.11'
                     mavenVersionOption: 'Default'
                     mavenAuthenticateFeed: false
                     effectivePomSkip: false
