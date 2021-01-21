@@ -138,7 +138,7 @@ stages:
                   env:
                     APPLITOOLS_API_KEY: $(APPLITOOLS_API_KEY)
                     RUNWHERE: pipeline
-                    TEST_START_PAGE: http://$(hostname)
+                    TEST_START_PAGE: https://$(hostname)
                     
   - stage: PromoteToProd
     displayName: Promote to Prod
