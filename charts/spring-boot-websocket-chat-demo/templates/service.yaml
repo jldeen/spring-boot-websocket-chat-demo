@@ -3,7 +3,9 @@ kind: Service
 metadata:
   name: {{ template "fullname" . }}
   labels:
+    app: {{ template "fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name }}  
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -13,3 +15,4 @@ spec:
     name: {{ .Values.service.name }}
   selector:
     app: {{ template "fullname" . }}
+    release: {{ .Release.Name }}  

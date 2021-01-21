@@ -28,7 +28,7 @@ stages:
 
           - task: Docker@2
             inputs:
-              containerRegistry: 'az-jldeen'
+              containerRegistry: 'az-jldeen-acr'
               repository: '$(Build.Repository.Name)'
               command: 'buildAndPush'
               Dockerfile: '**/Dockerfile'
@@ -99,8 +99,9 @@ stages:
                     command: 'upgrade'
                     chartType: 'FilePath'
                     chartPath: '$(Pipeline.Workspace)/drop/spring-boot-websocket-chat-demo-v0.1.0.tgz'
-                    releaseName: 'azd-chattybot'
+                    releaseName: 'azd-chattybot-dev'
                     overrideValues: 'image.repository=ttacrdl53e2sgw5z5i.azurecr.io/$(Build.Repository.Name),image.tag=$(Build.BuildId),ingress.hostname=$(hostname),buildID=$(Build.BuildId)'
+                    waitForExecution: false
 
                 - bash: |
                     # Run check to see when $(hostname) is available
