@@ -52,8 +52,6 @@ stages:
               command: 'package'
               chartPath: 'charts/spring-boot-websocket-chat-demo'
               destination: '$(Pipeline.Workspace)'
-
-          - bash: ls -la 
           
           - task: PublishPipelineArtifact@1
             inputs:
@@ -90,8 +88,6 @@ stages:
                     checkLatestHelmVersion: false
                     installKubectl: true
                     kubectlVersion: "1.17.1"
-                
-                - bash: ls -la 
 
                 - task: HelmDeploy@0
                   inputs:
@@ -102,7 +98,7 @@ stages:
                     namespace: 'jfrog-dev'
                     command: 'upgrade'
                     chartType: 'FilePath'
-                    chartPath: 'spring-boot-websocket-chat-demo-v0.1.0.tgz'
+                    chartPath: '$(Pipeline.Workspace)/drop/spring-boot-websocket-chat-demo-v0.1.0.tgz'
                     releaseName: 'azd-chattybot'
                     overrideValues: 'image.repository=ttacrdl53e2sgw5z5i.azurecr.io/$(Build.Repository.Name),image.tag=$(Build.BuildId),ingress.hostname=$(hostname),buildID=$(Build.BuildId)'
 
