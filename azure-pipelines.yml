@@ -121,6 +121,7 @@ stages:
                   displayName: HTTP Check
 
                 - task: ApplitoolsBuildTask@0
+                  displayName: Setup Applitools Visual Testing
 
                 - task: Maven@3
                   inputs:
