@@ -13,7 +13,7 @@ public class ChattyBotTests extends BaseTests {
     @Before
     public void startSession(){
         driver.get(appUrl);
-        homePage.enterUsername("angie");
+        homePage.enterUsername("jonathan");
         chatPage = homePage.clickStartChatting();
     }
 
