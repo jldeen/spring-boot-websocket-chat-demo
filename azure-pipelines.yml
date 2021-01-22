@@ -116,6 +116,7 @@ stages:
                         attempt_counter=$(($attempt_counter+1))
                         sleep 20
                     done
+                    sleep 60
                   displayName: HTTP Check
 
                 - task: ApplitoolsBuildTask@0
